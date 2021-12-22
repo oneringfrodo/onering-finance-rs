@@ -24,9 +24,9 @@ let stableVaultPda: web3.PublicKey, stableVaultBump: number;
 const FEE_PAYER_KEYPAIR = web3.Keypair.generate();
 const ADMIN_KEYPAIR = web3.Keypair.generate();
 const NEW_ADMIN_KEYPAIR = web3.Keypair.generate();
+const USER_KEYPAIR = web3.Keypair.generate();
 
 // reserve
-const USER_KEYPAIR = web3.Keypair.generate();
 let reservePda: web3.PublicKey, reserveBump: number;
 let initializerStableToken: web3.PublicKey,
   initializerOusdToken: web3.PublicKey;
