@@ -62,7 +62,7 @@ pub mod onering_finance {
         ctx.accounts.process(args)
     }
 
-    /// claim for accumulated 1USDC in reward of deposited stable tokens
+    /// claim for accumulated 1USD in reward of deposited stable tokens
     /// users can withdraw anothre USDC using this 1USD tokens
     pub fn claim(ctx: Context<Claim>, args: ClaimArgs) -> ProgramResult {
         ctx.accounts.process(args)
