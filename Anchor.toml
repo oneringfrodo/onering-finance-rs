@@ -1,0 +1,15 @@
+[programs.localnet]
+onering_finance = "oRnG11SQmnUr8QM3QS351ZG1dQcgNtvZhrMZCRA4CNf"
+
+[programs.devnet]
+onering_finance = "oRnG11SQmnUr8QM3QS351ZG1dQcgNtvZhrMZCRA4CNf"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn test"
