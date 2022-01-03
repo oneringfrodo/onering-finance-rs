@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::Mint;
+use anchor_spl::token::Mint as TokenMint;
 
-use crate::{error::*, states::*, traits::Processor};
+use crate::{args::*, error::*, states::*, traits::Processor};
 
 //-----------------------------------------------------
 
@@ -12,7 +12,7 @@ pub struct CreateAdmin<'info> {
     pub admin: Signer<'info>,
 
     /// 1USD mint, collateral asset
-    pub ousd_mint: Box<Account<'info, Mint>>,
+    pub ousd_mint: Box<Account<'info, TokenMint>>,
 
     /// onering main state
     #[account(zero)]
@@ -92,16 +92,3 @@ impl<'info> Processor<UpdateStateArgs> for UpdateState<'info> {
 }
 
 //-----------------------------------------------------
-
-#[derive(Clone, Copy, Debug, Default, PartialEq, AnchorSerialize, AnchorDeserialize)]
-pub struct CreateAdminArgs {
-    pub ousd_mint_auth_bump: u8,
-}
-
-#[derive(Clone, Copy, Debug, Default, PartialEq, AnchorSerialize, AnchorDeserialize)]
-pub struct UpdateAdminArgs {}
-
-#[derive(Clone, Copy, Debug, Default, PartialEq, AnchorSerialize, AnchorDeserialize)]
-pub struct UpdateStateArgs {
-    pub emergency_flag: bool,
-}

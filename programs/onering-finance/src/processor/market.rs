@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, Token, TokenAccount};
+use anchor_spl::token::{Mint as TokenMint, Token, TokenAccount};
 
-use crate::{constant::*, error::*, states::*, traits::*};
+use crate::{args::*, constant::*, error::*, states::*, traits::*};
 
 //-----------------------------------------------------
 
@@ -14,7 +14,7 @@ pub struct CreateMarket<'info> {
     pub admin: Signer<'info>,
 
     /// stable mint
-    pub stable_mint: Box<Account<'info, Mint>>,
+    pub stable_mint: Box<Account<'info, TokenMint>>,
 
     /// stable vault
     #[account(
@@ -66,8 +66,3 @@ impl<'info> Processor<CreateMarketArgs> for CreateMarket<'info> {
 }
 
 //-----------------------------------------------------
-
-#[derive(Clone, Copy, Debug, Default, PartialEq, AnchorSerialize, AnchorDeserialize)]
-pub struct CreateMarketArgs {
-    pub stable_vault_bump: u8,
-}

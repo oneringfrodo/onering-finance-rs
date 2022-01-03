@@ -1,5 +1,7 @@
 use anchor_lang::prelude::*;
 
+/// args
+pub mod args;
 /// constant
 pub mod constant;
 /// error
@@ -13,8 +15,7 @@ pub mod states;
 /// traits
 pub mod traits;
 
-use processor::*;
-use traits::Processor;
+use crate::{args::*, processor::*, traits::Processor};
 
 declare_id!("oRnG11SQmnUr8QM3QS351ZG1dQcgNtvZhrMZCRA4CNf");
 
@@ -24,60 +25,69 @@ pub mod onering_finance {
 
     /// initialize a main state, transaction executor is set to as an admin
     pub fn create_admin(ctx: Context<CreateAdmin>, args: CreateAdminArgs) -> ProgramResult {
+        // TODO: validate main state address
         ctx.accounts.process(args)
     }
 
     /// change admin authority of main state
     pub fn update_admin(ctx: Context<UpdateAdmin>, args: UpdateAdminArgs) -> ProgramResult {
+        // TODO: validate main state address
         ctx.accounts.process(args)
     }
 
     /// update main state
     pub fn update_state(ctx: Context<UpdateState>, args: UpdateStateArgs) -> ProgramResult {
+        // TODO: validate main state address
         ctx.accounts.process(args)
     }
 
     /// create a market for stable tokens,
     /// a stable token will have correspond pool address for the market
     pub fn create_market(ctx: Context<CreateMarket>, args: CreateMarketArgs) -> ProgramResult {
+        // TODO: validate market address
         ctx.accounts.process(args)
     }
 
-    /// mint 1USD token
-    pub fn mint(ctx: Context<Mint>, args: MintOrRedeemArgs) -> ProgramResult {
+    /// mint 1USD token in any stable tokens available
+    pub fn mint(ctx: Context<Mint>, args: DepositOrWithdrawArgs) -> ProgramResult {
+        // TODO: validate market address
         ctx.accounts.process(args)
     }
 
-    /// redeem 1USD token
-    pub fn redeem(ctx: Context<Redeem>, args: MintOrRedeemArgs) -> ProgramResult {
+    /// redeem 1USD token in USDC
+    /// we initially support withdraw in USDC only, so `withdrawal_liquidity` for other markets will be 0.
+    /// if we don't have enough `withdrawal_liquidity` in USDC market,
+    /// we will let them wait for another one week until we add `withdrawal_liquidity` with the harvested assets from APY farms.
+    pub fn redeem(ctx: Context<Redeem>, args: DepositOrWithdrawArgs) -> ProgramResult {
+        // TODO: validate market address
         ctx.accounts.process(args)
     }
 
-    /// create a reserve when users deposit stable tokens
+    /// create a deposit reserve account
     /// it will be used to keep track of deposits and rewards
     pub fn create_reserve(ctx: Context<CreateReserve>, args: CreateReserveArgs) -> ProgramResult {
         ctx.accounts.process(args)
     }
 
-    /// deposit stable token to a market
+    /// deposit (old stake) 1USD token
     pub fn deposit(ctx: Context<Deposit>, args: DepositOrWithdrawArgs) -> ProgramResult {
-        // TODO: check if reserve address is valid for the initializer 
         ctx.accounts.process(args)
     }
 
-    /// withdraw stable token from USDC market
-    /// we initially support withdraw in USDC only, so `withdrawal_liquidity` for other markets will be 0.
-    /// if we don't have enough `withdrawal_liquidity` in USDC market,
-    /// we will let them wait for another one week until we add `withdrawal_liquidity` with the harvested assets from APY farms.
+    /// withdraw (old unstake) 1USD token
     pub fn withdraw(ctx: Context<Withdraw>, args: DepositOrWithdrawArgs) -> ProgramResult {
-        // TODO: check if reserve address is valid for the initializer
         ctx.accounts.process(args)
     }
 
-    /// claim for accumulated 1USD in reward of deposited stable tokens
-    /// users can withdraw anothre USDC using this 1USD tokens
-    pub fn claim(ctx: Context<Claim>, args: ClaimArgs) -> ProgramResult {
-        // TODO: check if reserve address is valid for the initializer
+    /// claim for accumulated 1USD in reward of deposited (old staked) 1USD tokens
+    /// users can withdraw (old unstake) 1USD tokens
+    pub fn claim(ctx: Context<Claim>, args: DepositOrWithdrawArgs) -> ProgramResult {
+        ctx.accounts.process(args)
+    }
+
+    /// claim & deposit
+    /// users claim and deposit (old stake) 1USD tokens
+    pub fn claim_and_deposit(ctx: Context<Claim>, args: DepositOrWithdrawArgs) -> ProgramResult {
         ctx.accounts.process(args)
     }
 }

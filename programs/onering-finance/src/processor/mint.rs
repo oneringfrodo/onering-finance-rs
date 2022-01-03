@@ -1,13 +1,13 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Burn, Mint as TokenMint, MintTo, Token, TokenAccount, Transfer};
 
-use crate::{error::*, states::*, traits::*};
+use crate::{args::*, error::*, states::*, traits::*};
 
 //-----------------------------------------------------
 
 /// accounts for mint
 #[derive(Accounts)]
-#[instruction(args: MintOrRedeemArgs)]
+#[instruction(args: DepositOrWithdrawArgs)]
 pub struct Mint<'info> {
     /// user, mint initializer
     pub initializer: Signer<'info>,
@@ -105,8 +105,8 @@ impl<'info> Mint<'info> {
 }
 
 /// deposit to the market
-impl<'info> Processor<MintOrRedeemArgs> for Mint<'info> {
-    fn process(&mut self, args: MintOrRedeemArgs) -> ProgramResult {
+impl<'info> Processor<DepositOrWithdrawArgs> for Mint<'info> {
+    fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
         // transfer stable token from initializer to vault
         self.transfer_to_vault(args.amount)?;
 
@@ -121,7 +121,7 @@ impl<'info> Processor<MintOrRedeemArgs> for Mint<'info> {
 
 /// accounts for redeem
 #[derive(Accounts)]
-#[instruction(args: MintOrRedeemArgs)]
+#[instruction(args: DepositOrWithdrawArgs)]
 pub struct Redeem<'info> {
     /// user, redeem initializer
     pub initializer: Signer<'info>,
@@ -216,21 +216,19 @@ impl<'info> Redeem<'info> {
 }
 
 /// redeem, burn same amount of 1USD
-impl<'info> Processor<MintOrRedeemArgs> for Redeem<'info> {
-    fn process(&mut self, args: MintOrRedeemArgs) -> ProgramResult {
+impl<'info> Processor<DepositOrWithdrawArgs> for Redeem<'info> {
+    fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
         // transfer stable token from vault to initializer
         self.transfer_to_initializer(args.amount)?;
 
         // burn redeem amount of 1USD from initializer
         self.burn_from_initializer(args.amount)?;
 
+        // reduct withdrawal liquid
+        self.market.withdrawal_liq -= args.amount;
+
         Ok(())
     }
 }
 
 //-----------------------------------------------------
-
-#[derive(Clone, Copy, Debug, Default, PartialEq, AnchorSerialize, AnchorDeserialize)]
-pub struct MintOrRedeemArgs {
-    pub amount: u64,
-}

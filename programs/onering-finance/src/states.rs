@@ -87,6 +87,9 @@ where
 /// Reserved account
 #[account]
 pub struct Reserve {
+    /// reserve authority
+    pub authority: Pubkey,
+
     /// accumulated deposit amount of stable tokens no matter of its type
     pub deposit_amount: u64,
 
