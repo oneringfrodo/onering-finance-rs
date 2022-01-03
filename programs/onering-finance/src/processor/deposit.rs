@@ -1,5 +1,5 @@
 use anchor_lang::{prelude::*, solana_program::clock};
-use anchor_spl::token::{self, Burn, Mint as TokenMint, MintTo, Token, TokenAccount};
+use anchor_spl::token::{self, Burn, Mint as TokenMint, MintTo, Token, TokenAccount, Transfer};
 use std::mem::size_of;
 
 use crate::{args::*, constant::*, error::*, states::*, traits::*};
@@ -195,6 +195,47 @@ pub struct MintAndDeposit<'info> {
     pub token_program: Program<'info, Token>,
 }
 
+impl<'info> MintAndDeposit<'info> {
+    /// transfer stable token from initializer to vault
+    pub fn transfer_to_vault(&self, amount: u64) -> ProgramResult {
+        let cpi_accounts = Transfer {
+            from: self.authority_stable_token.to_account_info(),
+            to: self.stable_vault.to_account_info(),
+            authority: self.authority.to_account_info(),
+        };
+
+        token::transfer(
+            CpiContext::new(self.token_program.to_account_info(), cpi_accounts),
+            amount,
+        )
+    }
+}
+
+/// deposit 1USD directly for reward (old stake)
+/// no actual mint needed
+impl<'info> Processor<DepositOrWithdrawArgs> for MintAndDeposit<'info> {
+    fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
+        // transfer stable token from initializer to vault
+        self.transfer_to_vault(args.amount)?;
+
+        // initialize first update time
+        if self.state.first_update_time == 0 {
+            self.state.first_update_time = clock::Clock::get().unwrap().unix_timestamp;
+        }
+
+        // refresh reserve state
+        self.reserve.refresh_reserve(&mut self.state);
+
+        // accumulate deposit amount of any stable tokens
+        self.reserve.deposit_amount += args.amount;
+
+        // add stake liquidity, used to calculate rewards
+        self.state.deposit_amount += args.amount;
+
+        Ok(())
+    }
+}
+
 //-----------------------------------------------------
 
 /// accounts for withdraw
@@ -373,6 +414,7 @@ impl<'info> Processor<DepositOrWithdrawArgs> for Claim<'info> {
 //-----------------------------------------------------
 
 /// accounts for claim & deposit rewards
+/// deposit directly, transfer or burn not needed
 #[derive(Accounts)]
 #[instruction(args: DepositOrWithdrawArgs)]
 pub struct ClaimAndDeposit<'info> {

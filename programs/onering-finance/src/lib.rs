@@ -44,13 +44,13 @@ pub mod onering_finance {
     /// create a market for stable tokens,
     /// a stable token will have correspond pool address for the market
     pub fn create_market(ctx: Context<CreateMarket>, args: CreateMarketArgs) -> ProgramResult {
-        // TODO: validate market address
+        // TODO: validate market state address
         ctx.accounts.process(args)
     }
 
     /// mint 1USD token in any stable tokens available
     pub fn mint(ctx: Context<Mint>, args: DepositOrWithdrawArgs) -> ProgramResult {
-        // TODO: validate market address
+        // TODO: validate market state address
         ctx.accounts.process(args)
     }
 
@@ -59,7 +59,7 @@ pub mod onering_finance {
     /// if we don't have enough `withdrawal_liquidity` in USDC market,
     /// we will let them wait for another one week until we add `withdrawal_liquidity` with the harvested assets from APY farms.
     pub fn redeem(ctx: Context<Redeem>, args: DepositOrWithdrawArgs) -> ProgramResult {
-        // TODO: validate market address
+        // TODO: validate market state address
         ctx.accounts.process(args)
     }
 
@@ -71,6 +71,15 @@ pub mod onering_finance {
 
     /// deposit (old stake) 1USD token
     pub fn deposit(ctx: Context<Deposit>, args: DepositOrWithdrawArgs) -> ProgramResult {
+        ctx.accounts.process(args)
+    }
+
+    /// mint & deposit
+    pub fn mint_and_deposit(
+        ctx: Context<MintAndDeposit>,
+        args: DepositOrWithdrawArgs,
+    ) -> ProgramResult {
+        // TODO: validate market state address
         ctx.accounts.process(args)
     }
 
