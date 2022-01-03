@@ -10,7 +10,6 @@ use crate::{error::*, states::*, traits::*};
 #[instruction(args: ClaimArgs)]
 pub struct Claim<'info> {
     /// user, reserve initializer
-    #[account()]
     pub initializer: Signer<'info>,
 
     /// 1USD mint, collateral asset

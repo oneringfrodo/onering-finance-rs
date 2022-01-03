@@ -44,7 +44,6 @@ impl<'info> Processor<CreateAdminArgs> for CreateAdmin<'info> {
 #[derive(Accounts)]
 pub struct UpdateAdmin<'info> {
     /// admin
-    #[account()]
     pub admin: Signer<'info>,
 
     /// new admin
@@ -73,7 +72,6 @@ impl<'info> Processor<UpdateAdminArgs> for UpdateAdmin<'info> {
 #[derive(Accounts)]
 pub struct UpdateState<'info> {
     /// admin, onering initializer
-    #[account()]
     pub admin: Signer<'info>,
 
     /// global state

@@ -187,158 +187,158 @@ describe("onering-finance", () => {
     assert.ok(!market.lockFlag);
   });
 
-  it("should create a reserve PDA and deposit 100 stable tokens to a market", async () => {
-    const amount = new BN("100000000");
+  // it("should create a reserve PDA and deposit 100 stable tokens to a market", async () => {
+  //   const amount = new BN("100000000");
 
-    // mint 100 tokens to initializer stable token ATA
-    await stableMint.mintTo(
-      initializerStableToken,
-      STABLE_MINT_AUTH_KEYPAIR.publicKey,
-      [STABLE_MINT_AUTH_KEYPAIR],
-      amount.toNumber()
-    );
+  //   // mint 100 tokens to initializer stable token ATA
+  //   await stableMint.mintTo(
+  //     initializerStableToken,
+  //     STABLE_MINT_AUTH_KEYPAIR.publicKey,
+  //     [STABLE_MINT_AUTH_KEYPAIR],
+  //     amount.toNumber()
+  //   );
 
-    await program.rpc.createReserve(
-      { amount, reserveBump },
-      {
-        accounts: {
-          initializer: USER_KEYPAIR.publicKey,
-          stableMint: stableMint.publicKey,
-          stableVault: stableVaultPda,
-          initializerStableToken,
-          ousdMint: ousdMint.publicKey,
-          ousdMintAuth: ousdMintAuthPda,
-          initializerOusdToken,
-          reserve: reservePda,
-          market: MARKET_KEYPAIR.publicKey,
-          state: STATE_KEYPAIR.publicKey,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          systemProgram: web3.SystemProgram.programId,
-          rent: web3.SYSVAR_RENT_PUBKEY,
-        },
-        signers: [USER_KEYPAIR],
-      }
-    );
+  //   await program.rpc.createReserve(
+  //     { amount, reserveBump },
+  //     {
+  //       accounts: {
+  //         initializer: USER_KEYPAIR.publicKey,
+  //         stableMint: stableMint.publicKey,
+  //         stableVault: stableVaultPda,
+  //         initializerStableToken,
+  //         ousdMint: ousdMint.publicKey,
+  //         ousdMintAuth: ousdMintAuthPda,
+  //         initializerOusdToken,
+  //         reserve: reservePda,
+  //         market: MARKET_KEYPAIR.publicKey,
+  //         state: STATE_KEYPAIR.publicKey,
+  //         tokenProgram: TOKEN_PROGRAM_ID,
+  //         systemProgram: web3.SystemProgram.programId,
+  //         rent: web3.SYSVAR_RENT_PUBKEY,
+  //       },
+  //       signers: [USER_KEYPAIR],
+  //     }
+  //   );
 
-    // asserts
-    const reserve = await program.account.reserve.fetch(reservePda);
-    assert.ok(reserve.depositAmount.eq(amount));
-    assert.ok(!reserve.freezeFlag);
-    const stableVaultAccount = await stableMint.getAccountInfo(stableVaultPda);
-    assert.ok(stableVaultAccount.amount.eq(amount));
-    const initializerStableTokenAccount = await stableMint.getAccountInfo(
-      initializerStableToken
-    );
-    assert.ok(initializerStableTokenAccount.amount.eq(new BN("0")));
-    const initializerOusdTokenAccount = await ousdMint.getAccountInfo(
-      initializerOusdToken
-    );
-    assert.ok(initializerOusdTokenAccount.amount.eq(amount));
-  });
+  //   // asserts
+  //   const reserve = await program.account.reserve.fetch(reservePda);
+  //   assert.ok(reserve.depositAmount.eq(amount));
+  //   assert.ok(!reserve.freezeFlag);
+  //   const stableVaultAccount = await stableMint.getAccountInfo(stableVaultPda);
+  //   assert.ok(stableVaultAccount.amount.eq(amount));
+  //   const initializerStableTokenAccount = await stableMint.getAccountInfo(
+  //     initializerStableToken
+  //   );
+  //   assert.ok(initializerStableTokenAccount.amount.eq(new BN("0")));
+  //   const initializerOusdTokenAccount = await ousdMint.getAccountInfo(
+  //     initializerOusdToken
+  //   );
+  //   assert.ok(initializerOusdTokenAccount.amount.eq(amount));
+  // });
 
-  it("should withdraw 100 stable tokens from a market", async () => {
-    const amount = new BN("100000000");
+  // it("should withdraw 100 stable tokens from a market", async () => {
+  //   const amount = new BN("100000000");
 
-    assert.rejects(
-      async () => {
-        await program.rpc.withdraw(
-          { amount },
-          {
-            accounts: {
-              initializer: USER_KEYPAIR.publicKey,
-              stableMint: stableMint.publicKey,
-              stableVault: stableVaultPda,
-              initializerStableToken,
-              ousdMint: ousdMint.publicKey,
-              initializerOusdToken,
-              reserve: reservePda,
-              market: MARKET_KEYPAIR.publicKey,
-              state: STATE_KEYPAIR.publicKey,
-              tokenProgram: TOKEN_PROGRAM_ID,
-            },
-            signers: [USER_KEYPAIR],
-          }
-        );
-      },
-      {
-        code: 6011,
-        msg: "Insufficient withdrawal liquidity",
-      }
-    );
-  });
+  //   assert.rejects(
+  //     async () => {
+  //       await program.rpc.withdraw(
+  //         { amount },
+  //         {
+  //           accounts: {
+  //             initializer: USER_KEYPAIR.publicKey,
+  //             stableMint: stableMint.publicKey,
+  //             stableVault: stableVaultPda,
+  //             initializerStableToken,
+  //             ousdMint: ousdMint.publicKey,
+  //             initializerOusdToken,
+  //             reserve: reservePda,
+  //             market: MARKET_KEYPAIR.publicKey,
+  //             state: STATE_KEYPAIR.publicKey,
+  //             tokenProgram: TOKEN_PROGRAM_ID,
+  //           },
+  //           signers: [USER_KEYPAIR],
+  //         }
+  //       );
+  //     },
+  //     {
+  //       code: 6011,
+  //       msg: "Insufficient withdrawal liquidity",
+  //     }
+  //   );
+  // });
 
-  it("should deposit 100 stable tokens to a market", async () => {
-    const amount = new BN("100000000");
+  // it("should deposit 100 stable tokens to a market", async () => {
+  //   const amount = new BN("100000000");
 
-    assert.rejects(
-      async () => {
-        await program.rpc.deposit(
-          { amount, reserveBump: null },
-          {
-            accounts: {
-              initializer: USER_KEYPAIR.publicKey,
-              stableMint: stableMint.publicKey,
-              stableVault: stableVaultPda,
-              initializerStableToken,
-              ousdMint: ousdMint.publicKey,
-              ousdMintAuth: ousdMintAuthPda,
-              initializerOusdToken,
-              reserve: reservePda,
-              market: MARKET_KEYPAIR.publicKey,
-              state: STATE_KEYPAIR.publicKey,
-              tokenProgram: TOKEN_PROGRAM_ID,
-            },
-            signers: [USER_KEYPAIR],
-          }
-        );
-      },
-      {
-        code: 6009,
-        msg: "Insufficient stable balance",
-      }
-    );
+  //   assert.rejects(
+  //     async () => {
+  //       await program.rpc.deposit(
+  //         { amount, reserveBump: null },
+  //         {
+  //           accounts: {
+  //             initializer: USER_KEYPAIR.publicKey,
+  //             stableMint: stableMint.publicKey,
+  //             stableVault: stableVaultPda,
+  //             initializerStableToken,
+  //             ousdMint: ousdMint.publicKey,
+  //             ousdMintAuth: ousdMintAuthPda,
+  //             initializerOusdToken,
+  //             reserve: reservePda,
+  //             market: MARKET_KEYPAIR.publicKey,
+  //             state: STATE_KEYPAIR.publicKey,
+  //             tokenProgram: TOKEN_PROGRAM_ID,
+  //           },
+  //           signers: [USER_KEYPAIR],
+  //         }
+  //       );
+  //     },
+  //     {
+  //       code: 6009,
+  //       msg: "Insufficient stable balance",
+  //     }
+  //   );
 
-    // mint 100 tokens to initializer stable token ATA
-    await stableMint.mintTo(
-      initializerStableToken,
-      STABLE_MINT_AUTH_KEYPAIR.publicKey,
-      [STABLE_MINT_AUTH_KEYPAIR],
-      amount.toNumber()
-    );
+  //   // mint 100 tokens to initializer stable token ATA
+  //   await stableMint.mintTo(
+  //     initializerStableToken,
+  //     STABLE_MINT_AUTH_KEYPAIR.publicKey,
+  //     [STABLE_MINT_AUTH_KEYPAIR],
+  //     amount.toNumber()
+  //   );
 
-    await program.rpc.deposit(
-      { amount, reserveBump: null },
-      {
-        accounts: {
-          initializer: USER_KEYPAIR.publicKey,
-          stableMint: stableMint.publicKey,
-          stableVault: stableVaultPda,
-          initializerStableToken,
-          ousdMint: ousdMint.publicKey,
-          ousdMintAuth: ousdMintAuthPda,
-          initializerOusdToken,
-          reserve: reservePda,
-          market: MARKET_KEYPAIR.publicKey,
-          state: STATE_KEYPAIR.publicKey,
-          tokenProgram: TOKEN_PROGRAM_ID,
-        },
-        signers: [USER_KEYPAIR],
-      }
-    );
+  //   await program.rpc.deposit(
+  //     { amount, reserveBump: null },
+  //     {
+  //       accounts: {
+  //         initializer: USER_KEYPAIR.publicKey,
+  //         stableMint: stableMint.publicKey,
+  //         stableVault: stableVaultPda,
+  //         initializerStableToken,
+  //         ousdMint: ousdMint.publicKey,
+  //         ousdMintAuth: ousdMintAuthPda,
+  //         initializerOusdToken,
+  //         reserve: reservePda,
+  //         market: MARKET_KEYPAIR.publicKey,
+  //         state: STATE_KEYPAIR.publicKey,
+  //         tokenProgram: TOKEN_PROGRAM_ID,
+  //       },
+  //       signers: [USER_KEYPAIR],
+  //     }
+  //   );
 
-    // asserts
-    const reserve = await program.account.reserve.fetch(reservePda);
-    assert.ok(reserve.depositAmount.eq(amount.add(amount)));
-    assert.ok(!reserve.freezeFlag);
-    const stableVaultAccount = await stableMint.getAccountInfo(stableVaultPda);
-    assert.ok(stableVaultAccount.amount.eq(amount.add(amount)));
-    const initializerStableTokenAccount = await stableMint.getAccountInfo(
-      initializerStableToken
-    );
-    assert.ok(initializerStableTokenAccount.amount.eq(new BN("0")));
-    const initializerOusdTokenAccount = await ousdMint.getAccountInfo(
-      initializerOusdToken
-    );
-    assert.ok(initializerOusdTokenAccount.amount.eq(amount.add(amount)));
-  });
+  //   // asserts
+  //   const reserve = await program.account.reserve.fetch(reservePda);
+  //   assert.ok(reserve.depositAmount.eq(amount.add(amount)));
+  //   assert.ok(!reserve.freezeFlag);
+  //   const stableVaultAccount = await stableMint.getAccountInfo(stableVaultPda);
+  //   assert.ok(stableVaultAccount.amount.eq(amount.add(amount)));
+  //   const initializerStableTokenAccount = await stableMint.getAccountInfo(
+  //     initializerStableToken
+  //   );
+  //   assert.ok(initializerStableTokenAccount.amount.eq(new BN("0")));
+  //   const initializerOusdTokenAccount = await ousdMint.getAccountInfo(
+  //     initializerOusdToken
+  //   );
+  //   assert.ok(initializerOusdTokenAccount.amount.eq(amount.add(amount)));
+  // });
 });

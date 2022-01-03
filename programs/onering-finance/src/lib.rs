@@ -43,14 +43,25 @@ pub mod onering_finance {
         ctx.accounts.process(args)
     }
 
+    /// mint 1USD token
+    pub fn mint(ctx: Context<Mint>, args: MintOrRedeemArgs) -> ProgramResult {
+        ctx.accounts.process(args)
+    }
+
+    /// redeem 1USD token
+    pub fn redeem(ctx: Context<Redeem>, args: MintOrRedeemArgs) -> ProgramResult {
+        ctx.accounts.process(args)
+    }
+
     /// create a reserve when users deposit stable tokens
     /// it will be used to keep track of deposits and rewards
-    pub fn create_reserve(ctx: Context<CreateReserve>, args: DepositArgs) -> ProgramResult {
+    pub fn create_reserve(ctx: Context<CreateReserve>, args: CreateReserveArgs) -> ProgramResult {
         ctx.accounts.process(args)
     }
 
     /// deposit stable token to a market
-    pub fn deposit(ctx: Context<Deposit>, args: DepositArgs) -> ProgramResult {
+    pub fn deposit(ctx: Context<Deposit>, args: DepositOrWithdrawArgs) -> ProgramResult {
+        // TODO: check if reserve address is valid for the initializer 
         ctx.accounts.process(args)
     }
 
@@ -58,13 +69,15 @@ pub mod onering_finance {
     /// we initially support withdraw in USDC only, so `withdrawal_liquidity` for other markets will be 0.
     /// if we don't have enough `withdrawal_liquidity` in USDC market,
     /// we will let them wait for another one week until we add `withdrawal_liquidity` with the harvested assets from APY farms.
-    pub fn withdraw(ctx: Context<Withdraw>, args: WithdrawArgs) -> ProgramResult {
+    pub fn withdraw(ctx: Context<Withdraw>, args: DepositOrWithdrawArgs) -> ProgramResult {
+        // TODO: check if reserve address is valid for the initializer
         ctx.accounts.process(args)
     }
 
     /// claim for accumulated 1USD in reward of deposited stable tokens
     /// users can withdraw anothre USDC using this 1USD tokens
     pub fn claim(ctx: Context<Claim>, args: ClaimArgs) -> ProgramResult {
+        // TODO: check if reserve address is valid for the initializer
         ctx.accounts.process(args)
     }
 }
