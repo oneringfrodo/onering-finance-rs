@@ -113,18 +113,21 @@ impl Reserve {
                 0
             };
 
-        // proportional amount of deposit
-        let deposit_prop = self.deposit_amount / state.deposit_amount;
-        // proportional duration
-        let duration_prop = elapsed_time / (state.last_update_time - state.first_update_time);
-        // proportional reward
-        let reward_prop = state.reward_amount * deposit_prop * ((duration_prop as u32) as u64);
+        // no rewards if current `deposit_amount` is 0
+        if self.deposit_amount > 0 {
+            // proportional amount of deposit
+            let deposit_prop = self.deposit_amount / state.deposit_amount;
+            // proportional duration
+            let duration_prop = elapsed_time / (state.last_update_time - state.first_update_time);
+            // proportional reward
+            let reward_prop = state.reward_amount * deposit_prop * ((duration_prop as u32) as u64);
 
-        // update reward amount
-        self.reward_amount += reward_prop;
+            // update reward amount
+            self.reward_amount += reward_prop;
 
-        // update total reward amount
-        state.reward_amount -= reward_prop;
+            // update total reward amount
+            state.reward_amount -= reward_prop;
+        }
 
         // update last updated time
         self.last_update_time = state.last_update_time;

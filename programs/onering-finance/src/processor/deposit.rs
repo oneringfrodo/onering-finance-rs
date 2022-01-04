@@ -257,6 +257,7 @@ pub struct Withdraw<'info> {
 
     /// 1USD mint, collateral asset
     #[account(
+        mut,
         constraint = ousd_mint.key().eq(&state.ousd_mint) @ CommonError::InvalidOusdMint,
     )]
     pub ousd_mint: Box<Account<'info, TokenMint>>,

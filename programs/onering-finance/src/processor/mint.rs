@@ -149,6 +149,7 @@ pub struct Redeem<'info> {
 
     /// 1USD mint, collateral asset
     #[account(
+        mut,
         constraint = ousd_mint.key().eq(&state.ousd_mint) @ CommonError::InvalidOusdMint,
     )]
     pub ousd_mint: Box<Account<'info, TokenMint>>,
@@ -164,8 +165,10 @@ pub struct Redeem<'info> {
 
     /// market state
     #[account(
+        // TODO: redeem logic TBD
+        // mut,
+        // constraint = market.withdrawal_liq >= args.amount @ CommonError::InsufficientWithdrawalLiquidity,
         constraint = !market.lock_flag @ CommonError::MarketLocked,
-        constraint = market.withdrawal_liq >= args.amount @ CommonError::InsufficientWithdrawalLiquidity,
     )]
     pub market: Box<Account<'info, Market>>,
 
@@ -224,8 +227,9 @@ impl<'info> Processor<DepositOrWithdrawArgs> for Redeem<'info> {
         // burn redeem amount of 1USD from initializer
         self.burn_from_initializer(args.amount)?;
 
+        // TODO: redeem logic TBD
         // reduct withdrawal liquid
-        self.market.withdrawal_liq -= args.amount;
+        // self.market.withdrawal_liq -= args.amount;
 
         Ok(())
     }
