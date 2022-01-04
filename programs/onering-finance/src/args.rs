@@ -4,7 +4,7 @@ use anchor_lang::prelude::*;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, AnchorSerialize, AnchorDeserialize)]
 pub struct CreateReserveArgs {
-    pub reserve_bump: Option<u8>,
+    pub nonce: u8,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, AnchorSerialize, AnchorDeserialize)]

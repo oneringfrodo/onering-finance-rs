@@ -22,7 +22,7 @@ pub struct CreateReserve<'info> {
             RESERVE_SEED,
             state.key().as_ref(),
         ],
-        bump = args.reserve_bump.unwrap(),
+        bump = args.nonce,
         payer = initializer,
         space = 8 + size_of::<Reserve>(),
     )]
@@ -44,8 +44,8 @@ pub struct CreateReserve<'info> {
 
 /// create reserve
 impl<'info> Processor<CreateReserveArgs> for CreateReserve<'info> {
-    fn process(&mut self, _args: CreateReserveArgs) -> ProgramResult {
-        self.reserve.authority = self.initializer.key();
+    fn process(&mut self, args: CreateReserveArgs) -> ProgramResult {
+        self.reserve.nonce = args.nonce;
         self.reserve.deposit_amount = 0;
         self.reserve.reward_amount = 0;
         self.reserve.last_update_time = 0;
@@ -62,7 +62,7 @@ impl<'info> Processor<CreateReserveArgs> for CreateReserve<'info> {
 #[instruction(args: DepositOrWithdrawArgs)]
 pub struct Deposit<'info> {
     /// user, deposit initializer
-    pub authority: Signer<'info>,
+    pub initializer: Signer<'info>,
 
     /// 1USD mint, collateral asset
     #[account(
@@ -74,16 +74,21 @@ pub struct Deposit<'info> {
     /// 1USD token
     #[account(
         mut,
-        constraint = authority_ousd_token.owner.eq(authority.key) @ CommonError::InvalidOusdAccountOwner,
-        constraint = authority_ousd_token.mint.eq(&ousd_mint.key()) @ CommonError::InvalidOusdMint,
-        constraint = authority_ousd_token.amount >= args.amount @ CommonError::InsufficientOusdBalance,
+        constraint = initializer_ousd_token.owner.eq(initializer.key) @ CommonError::InvalidOusdAccountOwner,
+        constraint = initializer_ousd_token.mint.eq(&ousd_mint.key()) @ CommonError::InvalidOusdMint,
+        constraint = initializer_ousd_token.amount >= args.amount @ CommonError::InsufficientOusdBalance,
     )]
-    pub authority_ousd_token: Box<Account<'info, TokenAccount>>,
+    pub initializer_ousd_token: Box<Account<'info, TokenAccount>>,
 
     /// reserve state
     #[account(
         mut,
-        has_one = authority @ CommonError::AccessDenied,
+        seeds = [
+            initializer.key().as_ref(),
+            RESERVE_SEED,
+            state.key().as_ref(),
+        ],
+        bump = reserve.nonce,
         constraint = !reserve.freeze_flag @ CommonError::ReserveFrozen,
     )]
     pub reserve: Box<Account<'info, Reserve>>,
@@ -104,8 +109,8 @@ impl<'info> Deposit<'info> {
     pub fn burn_from_initializer(&self, amount: u64) -> ProgramResult {
         let cpi_accounts = Burn {
             mint: self.ousd_mint.to_account_info(),
-            to: self.authority_ousd_token.to_account_info(),
-            authority: self.authority.to_account_info(),
+            to: self.initializer_ousd_token.to_account_info(),
+            authority: self.initializer.to_account_info(),
         };
 
         token::burn(
@@ -146,7 +151,7 @@ impl<'info> Processor<DepositOrWithdrawArgs> for Deposit<'info> {
 #[instruction(args: DepositOrWithdrawArgs)]
 pub struct MintAndDeposit<'info> {
     /// user, reserve initializer
-    pub authority: Signer<'info>,
+    pub initializer: Signer<'info>,
 
     /// stable mint
     #[account(
@@ -164,16 +169,21 @@ pub struct MintAndDeposit<'info> {
     /// stable token
     #[account(
         mut,
-        constraint = authority_stable_token.owner.eq(authority.key) @ CommonError::InvalidStableAccountOwner,
-        constraint = authority_stable_token.mint.eq(&stable_mint.key()) @ CommonError::InvalidStableMint,
-        constraint = authority_stable_token.amount >= args.amount @ CommonError::InsufficientStableBalance,
+        constraint = initializer_stable_token.owner.eq(initializer.key) @ CommonError::InvalidStableAccountOwner,
+        constraint = initializer_stable_token.mint.eq(&stable_mint.key()) @ CommonError::InvalidStableMint,
+        constraint = initializer_stable_token.amount >= args.amount @ CommonError::InsufficientStableBalance,
     )]
-    pub authority_stable_token: Box<Account<'info, TokenAccount>>,
+    pub initializer_stable_token: Box<Account<'info, TokenAccount>>,
 
     /// reserve state
     #[account(
         mut,
-        has_one = authority @ CommonError::AccessDenied,
+        seeds = [
+            initializer.key().as_ref(),
+            RESERVE_SEED,
+            state.key().as_ref(),
+        ],
+        bump = reserve.nonce,
         constraint = !reserve.freeze_flag @ CommonError::ReserveFrozen,
     )]
     pub reserve: Box<Account<'info, Reserve>>,
@@ -199,9 +209,9 @@ impl<'info> MintAndDeposit<'info> {
     /// transfer stable token from initializer to vault
     pub fn transfer_to_vault(&self, amount: u64) -> ProgramResult {
         let cpi_accounts = Transfer {
-            from: self.authority_stable_token.to_account_info(),
+            from: self.initializer_stable_token.to_account_info(),
             to: self.stable_vault.to_account_info(),
-            authority: self.authority.to_account_info(),
+            authority: self.initializer.to_account_info(),
         };
 
         token::transfer(
@@ -243,7 +253,7 @@ impl<'info> Processor<DepositOrWithdrawArgs> for MintAndDeposit<'info> {
 #[instruction(args: DepositOrWithdrawArgs)]
 pub struct Withdraw<'info> {
     /// user, reserve initializer
-    pub authority: Signer<'info>,
+    pub initializer: Signer<'info>,
 
     /// 1USD mint, collateral asset
     #[account(
@@ -257,15 +267,20 @@ pub struct Withdraw<'info> {
     /// 1USD token
     #[account(
         mut,
-        constraint = authority_ousd_token.owner.eq(authority.key) @ CommonError::InvalidOusdAccountOwner,
-        constraint = authority_ousd_token.mint.eq(&ousd_mint.key()) @ CommonError::InvalidOusdMint,
+        constraint = initializer_ousd_token.owner.eq(initializer.key) @ CommonError::InvalidOusdAccountOwner,
+        constraint = initializer_ousd_token.mint.eq(&ousd_mint.key()) @ CommonError::InvalidOusdMint,
     )]
-    pub authority_ousd_token: Box<Account<'info, TokenAccount>>,
+    pub initializer_ousd_token: Box<Account<'info, TokenAccount>>,
 
     /// reserve state
     #[account(
         mut,
-        has_one = authority @ CommonError::AccessDenied,
+        seeds = [
+            initializer.key().as_ref(),
+            RESERVE_SEED,
+            state.key().as_ref(),
+        ],
+        bump = reserve.nonce,
         constraint = !reserve.freeze_flag @ CommonError::ReserveFrozen,
         constraint = reserve.deposit_amount >= args.amount @ CommonError::WithdrawalAmountTooMuch,
     )]
@@ -287,7 +302,7 @@ impl<'info> Withdraw<'info> {
     pub fn mint_to_initializer(&self, amount: u64) -> ProgramResult {
         let cpi_accounts = MintTo {
             mint: self.ousd_mint.to_account_info(),
-            to: self.authority_ousd_token.to_account_info(),
+            to: self.initializer_ousd_token.to_account_info(),
             authority: self.ousd_mint_auth.to_account_info(),
         };
 
@@ -330,7 +345,7 @@ impl<'info> Processor<DepositOrWithdrawArgs> for Withdraw<'info> {
 #[instruction(args: DepositOrWithdrawArgs)]
 pub struct Claim<'info> {
     /// user, reserve initializer
-    pub authority: Signer<'info>,
+    pub initializer: Signer<'info>,
 
     /// 1USD mint, collateral asset
     #[account(
@@ -344,15 +359,20 @@ pub struct Claim<'info> {
     /// 1USD token
     #[account(
         mut,
-        constraint = authority_ousd_token.owner.eq(authority.key) @ CommonError::InvalidOusdAccountOwner,
-        constraint = authority_ousd_token.mint.eq(&ousd_mint.key()) @ CommonError::InvalidOusdMint,
+        constraint = initializer_ousd_token.owner.eq(initializer.key) @ CommonError::InvalidOusdAccountOwner,
+        constraint = initializer_ousd_token.mint.eq(&ousd_mint.key()) @ CommonError::InvalidOusdMint,
     )]
-    pub authority_ousd_token: Box<Account<'info, TokenAccount>>,
+    pub initializer_ousd_token: Box<Account<'info, TokenAccount>>,
 
     /// reserve state
     #[account(
         mut,
-        has_one = authority @ CommonError::AccessDenied,
+        seeds = [
+            initializer.key().as_ref(),
+            RESERVE_SEED,
+            state.key().as_ref(),
+        ],
+        bump = reserve.nonce,
         constraint = !reserve.freeze_flag @ CommonError::ReserveFrozen,
     )]
     pub reserve: Box<Account<'info, Reserve>>,
@@ -373,7 +393,7 @@ impl<'info> Claim<'info> {
     pub fn mint_to_initializer(&self, amount: u64) -> ProgramResult {
         let cpi_accounts = MintTo {
             mint: self.ousd_mint.to_account_info(),
-            to: self.authority_ousd_token.to_account_info(),
+            to: self.initializer_ousd_token.to_account_info(),
             authority: self.ousd_mint_auth.to_account_info(),
         };
 
@@ -419,12 +439,17 @@ impl<'info> Processor<DepositOrWithdrawArgs> for Claim<'info> {
 #[instruction(args: DepositOrWithdrawArgs)]
 pub struct ClaimAndDeposit<'info> {
     /// user, reserve initializer
-    pub authority: Signer<'info>,
+    pub initializer: Signer<'info>,
 
     /// reserve state
     #[account(
         mut,
-        has_one = authority @ CommonError::AccessDenied,
+        seeds = [
+            initializer.key().as_ref(),
+            RESERVE_SEED,
+            state.key().as_ref(),
+        ],
+        bump = reserve.nonce,
         constraint = !reserve.freeze_flag @ CommonError::ReserveFrozen,
     )]
     pub reserve: Box<Account<'info, Reserve>>,

@@ -84,11 +84,11 @@ where
 
 //-----------------------------------------------------
 
-/// Reserved account
+/// Reserve account
 #[account]
 pub struct Reserve {
-    /// reserve authority
-    pub authority: Pubkey,
+    /// bump seed for reserve PDA
+    pub nonce: u8,
 
     /// accumulated deposit amount of stable tokens no matter of its type
     pub deposit_amount: u64,
