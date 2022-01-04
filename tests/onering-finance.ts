@@ -256,7 +256,6 @@ describe("onering-finance", () => {
                 systemProgram: web3.SystemProgram.programId,
                 rent: web3.SYSVAR_RENT_PUBKEY,
               },
-              signers: [USER_KEYPAIR],
             }
           ),
         ],
