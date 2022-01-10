@@ -213,12 +213,12 @@ impl<'info> Redeem<'info> {
             authority: self.stable_vault_auth.to_account_info(),
         };
 
-        self.state.with_vault_auth_seeds(|mint_seeds| {
+        self.state.with_vault_auth_seeds(|auth_seeds| {
             token::transfer(
                 CpiContext::new_with_signer(
                     self.token_program.to_account_info(),
                     cpi_accounts,
-                    &[mint_seeds],
+                    &[auth_seeds],
                 ),
                 amount,
             )
