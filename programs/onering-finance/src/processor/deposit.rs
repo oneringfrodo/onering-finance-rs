@@ -162,6 +162,12 @@ pub struct MintAndDeposit<'info> {
     /// stable vault
     #[account(
         mut,
+        seeds = [
+            market.stable_mint.key().as_ref(),
+            STABLE_VAULT_SEED,
+            market.key().as_ref()
+        ],
+        bump = market.stable_vault_bump,
         constraint = stable_vault.mint.eq(&stable_mint.key()) @ CommonError::InvalidStableMint,
     )]
     pub stable_vault: Box<Account<'info, TokenAccount>>,

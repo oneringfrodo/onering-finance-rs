@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Burn, Mint as TokenMint, MintTo, Token, TokenAccount, Transfer};
 
-use crate::{args::*, error::*, states::*, traits::*};
+use crate::{args::*, constant::*, error::*, states::*, traits::*};
 
 //-----------------------------------------------------
 
@@ -21,6 +21,12 @@ pub struct Mint<'info> {
     /// stable vault
     #[account(
         mut,
+        seeds = [
+            market.stable_mint.key().as_ref(),
+            STABLE_VAULT_SEED,
+            market.key().as_ref()
+        ],
+        bump = market.stable_vault_bump,
         constraint = stable_vault.mint.eq(&stable_mint.key()) @ CommonError::InvalidStableMint,
     )]
     pub stable_vault: Box<Account<'info, TokenAccount>>,
@@ -135,6 +141,12 @@ pub struct Redeem<'info> {
     /// stable vault
     #[account(
         mut,
+        seeds = [
+            market.stable_mint.key().as_ref(),
+            STABLE_VAULT_SEED,
+            market.key().as_ref()
+        ],
+        bump = market.stable_vault_bump,
         constraint = stable_vault.mint.eq(&stable_mint.key()) @ CommonError::InvalidStableMint,
     )]
     pub stable_vault: Box<Account<'info, TokenAccount>>,
