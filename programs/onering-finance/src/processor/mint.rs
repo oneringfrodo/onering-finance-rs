@@ -5,7 +5,7 @@ use crate::{args::*, constant::*, error::*, states::*, traits::*};
 
 //-----------------------------------------------------
 
-/// accounts for mint
+/// accounts for [mint]
 #[derive(Accounts)]
 #[instruction(args: DepositOrWithdrawArgs)]
 pub struct Mint<'info> {
@@ -74,6 +74,7 @@ pub struct Mint<'info> {
     pub token_program: Program<'info, Token>,
 }
 
+/// implementation for [Mint]
 impl<'info> Mint<'info> {
     /// transfer stable token from initializer to vault
     pub fn transfer_to_vault(&self, amount: u64) -> ProgramResult {
@@ -110,8 +111,9 @@ impl<'info> Mint<'info> {
     }
 }
 
-/// deposit to the market
+/// process [mint]
 impl<'info> Processor<DepositOrWithdrawArgs> for Mint<'info> {
+    /// deposit to the market
     fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
         // transfer stable token from initializer to vault
         self.transfer_to_vault(args.amount)?;
@@ -125,7 +127,7 @@ impl<'info> Processor<DepositOrWithdrawArgs> for Mint<'info> {
 
 //-----------------------------------------------------
 
-/// accounts for redeem
+/// accounts for [redeem]
 #[derive(Accounts)]
 #[instruction(args: DepositOrWithdrawArgs)]
 pub struct Redeem<'info> {
@@ -204,6 +206,7 @@ pub struct Redeem<'info> {
     pub token_program: Program<'info, Token>,
 }
 
+/// implementation for [Redeem]
 impl<'info> Redeem<'info> {
     /// transfer stable token from vault to initializer
     pub fn transfer_to_initializer(&self, amount: u64) -> ProgramResult {
@@ -240,8 +243,9 @@ impl<'info> Redeem<'info> {
     }
 }
 
-/// redeem, burn same amount of 1USD
+/// process [redeem]
 impl<'info> Processor<DepositOrWithdrawArgs> for Redeem<'info> {
+    /// redeem, burn correspond amount of 1USD
     fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
         // transfer stable token from vault to initializer
         self.transfer_to_initializer(args.amount)?;

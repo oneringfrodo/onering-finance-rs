@@ -28,7 +28,7 @@ pub struct CreateAdminArgs {
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, AnchorSerialize, AnchorDeserialize)]
-pub struct UpdateAdminArgs {}
+pub struct ApplyNewAdminArgs {}
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateStateArgs {

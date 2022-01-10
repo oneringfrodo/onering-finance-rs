@@ -29,8 +29,8 @@ pub mod onering_finance {
         ctx.accounts.process(args)
     }
 
-    /// change admin authority of main state
-    pub fn update_admin(ctx: Context<UpdateAdmin>, args: UpdateAdminArgs) -> ProgramResult {
+    /// apply new admin authority of main state
+    pub fn apply_new_admin(ctx: Context<ApplyNewAdmin>, args: ApplyNewAdminArgs) -> ProgramResult {
         // TODO: validate main state address
         ctx.accounts.process(args)
     }
@@ -75,10 +75,7 @@ pub mod onering_finance {
     }
 
     /// mint & deposit
-    pub fn mint_and_deposit(
-        ctx: Context<MintAndDeposit>,
-        args: DepositOrWithdrawArgs,
-    ) -> ProgramResult {
+    pub fn mint_and_deposit(ctx: Context<MintAndDeposit>, args: DepositOrWithdrawArgs) -> ProgramResult {
         // TODO: validate market state address
         ctx.accounts.process(args)
     }
@@ -97,6 +94,25 @@ pub mod onering_finance {
     /// claim & deposit
     /// users claim and deposit (old stake) 1USD tokens
     pub fn claim_and_deposit(ctx: Context<Claim>, args: DepositOrWithdrawArgs) -> ProgramResult {
+        ctx.accounts.process(args)
+    }
+
+    //================================================================
+    // Saber Stable Swap
+    //================================================================
+
+    /// deposit to Saber stable swap pool
+    pub fn saber_deposit(ctx: Context<SaberDeposit>, args: SaberDepositArgs) -> ProgramResult {
+        ctx.accounts.process(args)
+    }
+
+    /// withdraw from Saber stable swap pool
+    pub fn saber_withdraw(ctx: Context<SaberWithdraw>, args: SaberWithdrawArgs) -> ProgramResult {
+        ctx.accounts.process(args)
+    }
+
+    /// withdraw one from Saber stable swap pool
+    pub fn saber_withdraw_one(ctx: Context<SaberWithdrawOne>, args: SaberWithdrawOneArgs) -> ProgramResult {
         ctx.accounts.process(args)
     }
 }

@@ -5,7 +5,7 @@ use crate::{args::*, constant::*, error::*, states::*, traits::*};
 
 //-----------------------------------------------------
 
-/// accounts for market initialization
+/// accounts for [create_market]
 #[derive(Accounts)]
 #[instruction(args: CreateMarketArgs)]
 pub struct CreateMarket<'info> {
@@ -61,8 +61,9 @@ pub struct CreateMarket<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-/// initialize market corresponds to a stable token
+/// process [create_market]
 impl<'info> Processor<CreateMarketArgs> for CreateMarket<'info> {
+    /// initialize market corresponds to a stable token
     fn process(&mut self, args: CreateMarketArgs) -> ProgramResult {
         self.market.stable_mint = self.stable_mint.key();
         self.market.stable_vault_bump = args.stable_vault_bump;

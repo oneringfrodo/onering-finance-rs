@@ -5,7 +5,7 @@ use crate::{args::*, error::*, states::*, traits::Processor};
 
 //-----------------------------------------------------
 
-/// accounts for admin initialization
+/// accounts for [create_admin]
 #[derive(Accounts)]
 pub struct CreateAdmin<'info> {
     /// admin, onering initializer
@@ -19,7 +19,7 @@ pub struct CreateAdmin<'info> {
     pub state: Box<Account<'info, State>>,
 }
 
-/// create admin account
+/// process [create_admin]
 impl<'info> Processor<CreateAdminArgs> for CreateAdmin<'info> {
     fn process(&mut self, args: CreateAdminArgs) -> ProgramResult {
         self.state.admin = self.admin.key();
@@ -42,9 +42,9 @@ impl<'info> Processor<CreateAdminArgs> for CreateAdmin<'info> {
 
 //-----------------------------------------------------
 
-/// accounts for admin update
+/// accounts for [apply_new_admin]
 #[derive(Accounts)]
-pub struct UpdateAdmin<'info> {
+pub struct ApplyNewAdmin<'info> {
     /// admin
     pub admin: Signer<'info>,
 
@@ -59,9 +59,9 @@ pub struct UpdateAdmin<'info> {
     pub state: Box<Account<'info, State>>,
 }
 
-/// update admin account
-impl<'info> Processor<UpdateAdminArgs> for UpdateAdmin<'info> {
-    fn process(&mut self, _args: UpdateAdminArgs) -> ProgramResult {
+/// process [apply_new_admin]
+impl<'info> Processor<ApplyNewAdminArgs> for ApplyNewAdmin<'info> {
+    fn process(&mut self, _args: ApplyNewAdminArgs) -> ProgramResult {
         self.state.admin = self.new_admin.key();
 
         Ok(())
@@ -70,7 +70,7 @@ impl<'info> Processor<UpdateAdminArgs> for UpdateAdmin<'info> {
 
 //-----------------------------------------------------
 
-/// accounts for main state update
+/// accounts for [update_state]
 #[derive(Accounts)]
 pub struct UpdateState<'info> {
     /// admin, onering initializer
@@ -84,7 +84,7 @@ pub struct UpdateState<'info> {
     pub state: Box<Account<'info, State>>,
 }
 
-/// update main state
+/// process [update_state]
 impl<'info> Processor<UpdateStateArgs> for UpdateState<'info> {
     fn process(&mut self, args: UpdateStateArgs) -> ProgramResult {
         self.state.emergency_flag = args.emergency_flag;

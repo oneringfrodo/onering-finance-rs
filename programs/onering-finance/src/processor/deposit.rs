@@ -6,7 +6,7 @@ use crate::{args::*, constant::*, error::*, states::*, traits::*};
 
 //-----------------------------------------------------
 
-/// accounts for reserve
+/// accounts for [create_reserve]
 #[derive(Accounts)]
 #[instruction(args: CreateReserveArgs)]
 pub struct CreateReserve<'info> {
@@ -42,7 +42,7 @@ pub struct CreateReserve<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-/// create reserve
+/// process [create_reserve]
 impl<'info> Processor<CreateReserveArgs> for CreateReserve<'info> {
     fn process(&mut self, args: CreateReserveArgs) -> ProgramResult {
         self.reserve.nonce = args.nonce;
@@ -57,7 +57,7 @@ impl<'info> Processor<CreateReserveArgs> for CreateReserve<'info> {
 
 //-----------------------------------------------------
 
-/// accounts for reserve
+/// accounts for [deposit]
 #[derive(Accounts)]
 #[instruction(args: DepositOrWithdrawArgs)]
 pub struct Deposit<'info> {
@@ -104,6 +104,7 @@ pub struct Deposit<'info> {
     pub token_program: Program<'info, Token>,
 }
 
+/// implementation for [Deposit]
 impl<'info> Deposit<'info> {
     /// burn deposit (old stake) amount of 1USD from initializer
     pub fn burn_from_initializer(&self, amount: u64) -> ProgramResult {
@@ -120,8 +121,9 @@ impl<'info> Deposit<'info> {
     }
 }
 
-/// deposit 1USD for reward (old stake)
+/// process [deposit]
 impl<'info> Processor<DepositOrWithdrawArgs> for Deposit<'info> {
+    /// deposit 1USD for reward (old stake)
     fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
         // initialize first update time
         if self.state.first_update_time == 0 {
@@ -146,7 +148,7 @@ impl<'info> Processor<DepositOrWithdrawArgs> for Deposit<'info> {
 
 //-----------------------------------------------------
 
-/// accounts for mint & deposit
+/// accounts for [mint_and_deposit]
 #[derive(Accounts)]
 #[instruction(args: DepositOrWithdrawArgs)]
 pub struct MintAndDeposit<'info> {
@@ -211,6 +213,7 @@ pub struct MintAndDeposit<'info> {
     pub token_program: Program<'info, Token>,
 }
 
+/// implementation for [MintAndDeposit]
 impl<'info> MintAndDeposit<'info> {
     /// transfer stable token from initializer to vault
     pub fn transfer_to_vault(&self, amount: u64) -> ProgramResult {
@@ -227,9 +230,10 @@ impl<'info> MintAndDeposit<'info> {
     }
 }
 
-/// deposit 1USD directly for reward (old stake)
-/// no actual mint needed
+/// process [deposit_and_mint]
 impl<'info> Processor<DepositOrWithdrawArgs> for MintAndDeposit<'info> {
+    /// deposit 1USD directly for reward (old stake)
+    /// no actual mint needed
     fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
         // transfer stable token from initializer to vault
         self.transfer_to_vault(args.amount)?;
@@ -254,7 +258,7 @@ impl<'info> Processor<DepositOrWithdrawArgs> for MintAndDeposit<'info> {
 
 //-----------------------------------------------------
 
-/// accounts for withdraw
+/// accounts for [withdraw]
 #[derive(Accounts)]
 #[instruction(args: DepositOrWithdrawArgs)]
 pub struct Withdraw<'info> {
@@ -304,6 +308,7 @@ pub struct Withdraw<'info> {
     pub token_program: Program<'info, Token>,
 }
 
+/// implementatin for [withdraw]
 impl<'info> Withdraw<'info> {
     /// mint withdraw amount of 1USD to initializer
     pub fn mint_to_initializer(&self, amount: u64) -> ProgramResult {
@@ -326,8 +331,9 @@ impl<'info> Withdraw<'info> {
     }
 }
 
-/// widthdraw, burn same amount of 1USD
+/// process [withdraw]
 impl<'info> Processor<DepositOrWithdrawArgs> for Withdraw<'info> {
+    /// widthdraw, burn same amount of 1USD
     fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
         // refresh reserve state
         self.reserve.refresh_reserve(&mut self.state);
@@ -347,7 +353,7 @@ impl<'info> Processor<DepositOrWithdrawArgs> for Withdraw<'info> {
 
 //-----------------------------------------------------
 
-/// accounts for claim rewards
+/// accounts for [claim]
 #[derive(Accounts)]
 #[instruction(args: DepositOrWithdrawArgs)]
 pub struct Claim<'info> {
@@ -395,6 +401,7 @@ pub struct Claim<'info> {
     pub token_program: Program<'info, Token>,
 }
 
+/// implementation for [claim]
 impl<'info> Claim<'info> {
     /// mint claim amount of 1USD to initializer
     pub fn mint_to_initializer(&self, amount: u64) -> ProgramResult {
@@ -417,8 +424,9 @@ impl<'info> Claim<'info> {
     }
 }
 
-/// claim for rewards
+/// process [claim]
 impl<'info> Processor<DepositOrWithdrawArgs> for Claim<'info> {
+    /// claim for rewards
     fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
         // refresh reserve state
         self.reserve.refresh_reserve(&mut self.state);
@@ -440,8 +448,7 @@ impl<'info> Processor<DepositOrWithdrawArgs> for Claim<'info> {
 
 //-----------------------------------------------------
 
-/// accounts for claim & deposit rewards
-/// deposit directly, transfer or burn not needed
+/// accounts for [claim_and_deposit]
 #[derive(Accounts)]
 #[instruction(args: DepositOrWithdrawArgs)]
 pub struct ClaimAndDeposit<'info> {
@@ -472,8 +479,9 @@ pub struct ClaimAndDeposit<'info> {
     pub token_program: Program<'info, Token>,
 }
 
-/// claim for rewards
+/// process [cliam_and_deposit]
 impl<'info> Processor<DepositOrWithdrawArgs> for ClaimAndDeposit<'info> {
+    /// claim and deposit directly, transfer or burn not needed
     fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
         // refresh reserve state
         self.reserve.refresh_reserve(&mut self.state);
