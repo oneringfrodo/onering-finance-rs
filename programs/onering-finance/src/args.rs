@@ -24,6 +24,7 @@ pub struct CreateMarketArgs {
 #[derive(Clone, Copy, Debug, Default, PartialEq, AnchorSerialize, AnchorDeserialize)]
 pub struct CreateAdminArgs {
     pub ousd_mint_auth_bump: u8,
+    pub stable_vault_auth_bump: u8,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, AnchorSerialize, AnchorDeserialize)]

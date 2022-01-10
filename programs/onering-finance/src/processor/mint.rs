@@ -23,7 +23,7 @@ pub struct Mint<'info> {
         mut,
         seeds = [
             market.stable_mint.key().as_ref(),
-            STABLE_VAULT_SEED,
+            STABLE_VAULT_SEED.as_ref(),
             market.key().as_ref()
         ],
         bump = market.stable_vault_bump,
@@ -143,13 +143,23 @@ pub struct Redeem<'info> {
         mut,
         seeds = [
             market.stable_mint.key().as_ref(),
-            STABLE_VAULT_SEED,
+            STABLE_VAULT_SEED.as_ref(),
             market.key().as_ref()
         ],
         bump = market.stable_vault_bump,
         constraint = stable_vault.mint.eq(&stable_mint.key()) @ CommonError::InvalidStableMint,
     )]
     pub stable_vault: Box<Account<'info, TokenAccount>>,
+
+    /// stable vault authority
+    #[account(
+        seeds = [
+            STABLE_VAULT_SEED.as_ref(),
+            state.key().as_ref()
+        ],
+        bump = state.stable_vault_auth_bump,
+    )]
+    pub stable_vault_auth: UncheckedAccount<'info>,
 
     /// stable token
     #[account(
@@ -200,10 +210,10 @@ impl<'info> Redeem<'info> {
         let cpi_accounts = Transfer {
             from: self.stable_vault.to_account_info(),
             to: self.initializer_stable_token.to_account_info(),
-            authority: self.stable_vault.to_account_info(),
+            authority: self.stable_vault_auth.to_account_info(),
         };
 
-        self.market.with_vault_auth_seeds(|mint_seeds| {
+        self.state.with_vault_auth_seeds(|mint_seeds| {
             token::transfer(
                 CpiContext::new_with_signer(
                     self.token_program.to_account_info(),

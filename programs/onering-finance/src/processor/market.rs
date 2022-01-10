@@ -21,15 +21,25 @@ pub struct CreateMarket<'info> {
         init,
         seeds = [
             stable_mint.key().as_ref(),
-            STABLE_VAULT_SEED,
+            STABLE_VAULT_SEED.as_ref(),
             market.key().as_ref()
         ],
         bump = args.stable_vault_bump,
         payer = admin,
         token::mint = stable_mint,
-        token::authority = stable_vault,
+        token::authority = stable_vault_auth,
     )]
     pub stable_vault: Box<Account<'info, TokenAccount>>,
+
+    /// stable vault authority
+    #[account(
+        seeds = [
+            STABLE_VAULT_SEED.as_ref(),
+            state.key().as_ref()
+        ],
+        bump = state.stable_vault_auth_bump,
+    )]
+    pub stable_vault_auth: UncheckedAccount<'info>,
 
     /// market state
     #[account(zero)]

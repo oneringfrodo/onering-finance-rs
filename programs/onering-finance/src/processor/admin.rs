@@ -27,6 +27,8 @@ impl<'info> Processor<CreateAdminArgs> for CreateAdmin<'info> {
         self.state.ousd_mint = self.ousd_mint.key();
         self.state.ousd_mint_auth_bump = args.ousd_mint_auth_bump;
 
+        self.state.stable_vault_auth_bump = args.stable_vault_auth_bump;
+
         self.state.deposit_amount = 0;
         self.state.reward_amount = 0;
         self.state.first_update_time = 0;

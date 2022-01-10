@@ -19,7 +19,7 @@ pub struct CreateReserve<'info> {
         init,
         seeds = [
             initializer.key().as_ref(),
-            RESERVE_SEED,
+            RESERVE_SEED.as_ref(),
             state.key().as_ref(),
         ],
         bump = args.nonce,
@@ -85,7 +85,7 @@ pub struct Deposit<'info> {
         mut,
         seeds = [
             initializer.key().as_ref(),
-            RESERVE_SEED,
+            RESERVE_SEED.as_ref(),
             state.key().as_ref(),
         ],
         bump = reserve.nonce,
@@ -164,7 +164,7 @@ pub struct MintAndDeposit<'info> {
         mut,
         seeds = [
             market.stable_mint.key().as_ref(),
-            STABLE_VAULT_SEED,
+            STABLE_VAULT_SEED.as_ref(),
             market.key().as_ref()
         ],
         bump = market.stable_vault_bump,
@@ -186,7 +186,7 @@ pub struct MintAndDeposit<'info> {
         mut,
         seeds = [
             initializer.key().as_ref(),
-            RESERVE_SEED,
+            RESERVE_SEED.as_ref(),
             state.key().as_ref(),
         ],
         bump = reserve.nonce,
@@ -284,7 +284,7 @@ pub struct Withdraw<'info> {
         mut,
         seeds = [
             initializer.key().as_ref(),
-            RESERVE_SEED,
+            RESERVE_SEED.as_ref(),
             state.key().as_ref(),
         ],
         bump = reserve.nonce,
@@ -376,7 +376,7 @@ pub struct Claim<'info> {
         mut,
         seeds = [
             initializer.key().as_ref(),
-            RESERVE_SEED,
+            RESERVE_SEED.as_ref(),
             state.key().as_ref(),
         ],
         bump = reserve.nonce,
@@ -453,7 +453,7 @@ pub struct ClaimAndDeposit<'info> {
         mut,
         seeds = [
             initializer.key().as_ref(),
-            RESERVE_SEED,
+            RESERVE_SEED.as_ref(),
             state.key().as_ref(),
         ],
         bump = reserve.nonce,

@@ -17,6 +17,9 @@ pub struct State {
     /// 1USD mint authority bump seed
     pub ousd_mint_auth_bump: u8,
 
+    /// stable vault authority bump seed
+    pub stable_vault_auth_bump: u8,
+
     /// total deposit amount
     /// accumulated when users deposit stable tokens
     /// reducted when new withdrawal_liq is provided
@@ -43,9 +46,22 @@ where
 {
     fn with_mint_auth_seeds<R, F: FnOnce(&[&[u8]]) -> R>(&self, f: F) -> R {
         f(&[
-            OUSD_MINT_AUTH_SEED,
+            OUSD_MINT_AUTH_SEED.as_ref(),
             &self.key().as_ref(),
             &[self.as_ref().ousd_mint_auth_bump],
+        ])
+    }
+}
+
+impl<T> VaultAuthority for T
+where
+    T: Located<State>,
+{
+    fn with_vault_auth_seeds<R, F: FnOnce(&[&[u8]]) -> R>(&self, f: F) -> R {
+        f(&[
+            STABLE_VAULT_SEED.as_ref(),
+            &self.key().as_ref(),
+            &[self.as_ref().stable_vault_auth_bump],
         ])
     }
 }
@@ -66,20 +82,6 @@ pub struct Market {
 
     /// lock flag
     pub lock_flag: bool,
-}
-
-impl<T> VaultAuthority for T
-where
-    T: Located<Market>,
-{
-    fn with_vault_auth_seeds<R, F: FnOnce(&[&[u8]]) -> R>(&self, f: F) -> R {
-        f(&[
-            &self.as_ref().stable_mint.key().as_ref(),
-            STABLE_VAULT_SEED,
-            &self.key().as_ref(),
-            &[self.as_ref().stable_vault_bump],
-        ])
-    }
 }
 
 //-----------------------------------------------------

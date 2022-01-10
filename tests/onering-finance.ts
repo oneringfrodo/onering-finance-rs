@@ -1,45 +1,54 @@
 import assert from "assert";
 import * as anchor from "@project-serum/anchor";
-import { web3, Program, BN } from "@project-serum/anchor";
+import { Program, BN } from "@project-serum/anchor";
+import {
+  Keypair,
+  PublicKey,
+  Transaction,
+  LAMPORTS_PER_SOL,
+  SystemProgram,
+  SYSVAR_RENT_PUBKEY,
+} from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, Token } from "@solana/spl-token";
 import { OneringFinance } from "../target/types/onering_finance";
 
 // PDA seeds
+const WRONG_SEED = "wrong_seed";
 const OUSD_MINT_AUTH_SEED = "or_ousd_mint_auth";
 const STABLE_VAULT_SEED = "or_stable_vault";
 const RESERVE_SEED = "or_reserve";
 
 // main state & 1USD mint
-const STATE_KEYPAIR = web3.Keypair.generate();
+const STATE_KEYPAIR = Keypair.generate();
 let ousdMint: Token;
-let ousdMintAuthPda: web3.PublicKey, ousdMintAuthBump: number;
+let ousdMintAuthPda: PublicKey, ousdMintAuthBump: number;
 
 // market, stable mint, stable vault
-const MARKET_KEYPAIR = web3.Keypair.generate();
-const STABLE_MINT_AUTH_KEYPAIR = web3.Keypair.generate();
+const MARKET_KEYPAIR = Keypair.generate();
+const STABLE_MINT_AUTH_KEYPAIR = Keypair.generate();
 let stableMint: Token;
-let stableVaultPda: web3.PublicKey, stableVaultBump: number;
+let stableVaultPda: PublicKey, stableVaultBump: number;
+let stableVaultAuthPda: PublicKey, stableVaultAuthBump: number;
+let wrongStableVaultAuthPda: PublicKey;
 
 // accounts
-const FEE_PAYER_KEYPAIR = web3.Keypair.generate();
-const ADMIN_KEYPAIR = web3.Keypair.generate();
-const NEW_ADMIN_KEYPAIR = web3.Keypair.generate();
-const USER_KEYPAIR = web3.Keypair.generate();
+const FEE_PAYER_KEYPAIR = Keypair.generate();
+const ADMIN_KEYPAIR = Keypair.generate();
+const NEW_ADMIN_KEYPAIR = Keypair.generate();
+const USER_KEYPAIR = Keypair.generate();
 
 // amounts
 const DEPOSIT_AMOUNT = new BN("100000000");
 
 // reserve
-let reservePda: web3.PublicKey, reserveBump: number;
-let initializerStableToken: web3.PublicKey,
-  initializerOusdToken: web3.PublicKey;
+let reservePda: PublicKey, reserveBump: number;
+let initializerStableToken: PublicKey, initializerOusdToken: PublicKey;
 
 describe("onering-finance", () => {
   // Configure the client to use the local cluster.
   const provider = anchor.Provider.env();
   anchor.setProvider(provider);
 
-  // @ts-ignore
   const program = anchor.workspace.OneringFinance as Program<OneringFinance>;
 
   before(async () => {
@@ -47,7 +56,7 @@ describe("onering-finance", () => {
     await provider.connection.confirmTransaction(
       await provider.connection.requestAirdrop(
         FEE_PAYER_KEYPAIR.publicKey,
-        10 * web3.LAMPORTS_PER_SOL
+        10 * LAMPORTS_PER_SOL
       ),
       "confirmed"
     );
@@ -55,22 +64,22 @@ describe("onering-finance", () => {
     // funds main accounts
     await provider.send(
       (() => {
-        const tx = new web3.Transaction();
+        const tx = new Transaction();
         tx.add(
-          web3.SystemProgram.transfer({
+          SystemProgram.transfer({
             fromPubkey: FEE_PAYER_KEYPAIR.publicKey,
             toPubkey: ADMIN_KEYPAIR.publicKey,
-            lamports: web3.LAMPORTS_PER_SOL,
+            lamports: LAMPORTS_PER_SOL,
           }),
-          web3.SystemProgram.transfer({
+          SystemProgram.transfer({
             fromPubkey: FEE_PAYER_KEYPAIR.publicKey,
             toPubkey: NEW_ADMIN_KEYPAIR.publicKey,
-            lamports: web3.LAMPORTS_PER_SOL,
+            lamports: LAMPORTS_PER_SOL,
           }),
-          web3.SystemProgram.transfer({
+          SystemProgram.transfer({
             fromPubkey: FEE_PAYER_KEYPAIR.publicKey,
             toPubkey: USER_KEYPAIR.publicKey,
-            lamports: web3.LAMPORTS_PER_SOL,
+            lamports: LAMPORTS_PER_SOL,
           })
         );
         return tx;
@@ -79,14 +88,13 @@ describe("onering-finance", () => {
     );
 
     // 1USD mint authority (PDA)
-    [ousdMintAuthPda, ousdMintAuthBump] =
-      await web3.PublicKey.findProgramAddress(
-        [
-          Buffer.from(anchor.utils.bytes.utf8.encode(OUSD_MINT_AUTH_SEED)),
-          STATE_KEYPAIR.publicKey.toBuffer(),
-        ],
-        program.programId
-      );
+    [ousdMintAuthPda, ousdMintAuthBump] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from(anchor.utils.bytes.utf8.encode(OUSD_MINT_AUTH_SEED)),
+        STATE_KEYPAIR.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
 
     // create 1USD token mint
     ousdMint = await Token.createMint(
@@ -126,8 +134,8 @@ describe("onering-finance", () => {
       DEPOSIT_AMOUNT.toNumber()
     );
 
-    // stable vault, authority itself (PDA)
-    [stableVaultPda, stableVaultBump] = await web3.PublicKey.findProgramAddress(
+    // stable vault
+    [stableVaultPda, stableVaultBump] = await PublicKey.findProgramAddress(
       [
         stableMint.publicKey.toBuffer(),
         Buffer.from(anchor.utils.bytes.utf8.encode(STABLE_VAULT_SEED)),
@@ -136,8 +144,26 @@ describe("onering-finance", () => {
       program.programId
     );
 
+    // stable vault authority
+    [stableVaultAuthPda, stableVaultAuthBump] =
+      await PublicKey.findProgramAddress(
+        [
+          Buffer.from(anchor.utils.bytes.utf8.encode(STABLE_VAULT_SEED)),
+          STATE_KEYPAIR.publicKey.toBuffer(),
+        ],
+        program.programId
+      );
+
+    [wrongStableVaultAuthPda] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from(anchor.utils.bytes.utf8.encode(WRONG_SEED)),
+        STATE_KEYPAIR.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
+
     // reserve PDA
-    [reservePda, reserveBump] = await web3.PublicKey.findProgramAddress(
+    [reservePda, reserveBump] = await PublicKey.findProgramAddress(
       [
         USER_KEYPAIR.publicKey.toBuffer(),
         Buffer.from(anchor.utils.bytes.utf8.encode(RESERVE_SEED)),
@@ -149,7 +175,10 @@ describe("onering-finance", () => {
 
   it("should create an admin", async () => {
     await program.rpc.createAdmin(
-      { ousdMintAuthBump },
+      {
+        ousdMintAuthBump,
+        stableVaultAuthBump,
+      },
       {
         accounts: {
           admin: ADMIN_KEYPAIR.publicKey,
@@ -171,18 +200,50 @@ describe("onering-finance", () => {
   });
 
   it("should create a market (stable token pool)", async () => {
+    try {
+      await program.rpc.createMarket(
+        {
+          stableVaultBump,
+        },
+        {
+          accounts: {
+            admin: ADMIN_KEYPAIR.publicKey,
+            stableMint: stableMint.publicKey,
+            stableVault: stableVaultPda,
+            stableVaultAuth: wrongStableVaultAuthPda,
+            market: MARKET_KEYPAIR.publicKey,
+            state: STATE_KEYPAIR.publicKey,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            systemProgram: SystemProgram.programId,
+            rent: SYSVAR_RENT_PUBKEY,
+          },
+          instructions: [
+            await program.account.market.createInstruction(MARKET_KEYPAIR),
+          ],
+          signers: [ADMIN_KEYPAIR, MARKET_KEYPAIR],
+        }
+      );
+      assert.fail();
+    } catch (err) {
+      assert.equal(err.code, 2006);
+      assert.equal(err.msg, "A seeds constraint was violated");
+    }
+
     await program.rpc.createMarket(
-      { stableVaultBump },
+      {
+        stableVaultBump,
+      },
       {
         accounts: {
           admin: ADMIN_KEYPAIR.publicKey,
           stableMint: stableMint.publicKey,
           stableVault: stableVaultPda,
+          stableVaultAuth: stableVaultAuthPda,
           market: MARKET_KEYPAIR.publicKey,
           state: STATE_KEYPAIR.publicKey,
           tokenProgram: TOKEN_PROGRAM_ID,
-          systemProgram: web3.SystemProgram.programId,
-          rent: web3.SYSVAR_RENT_PUBKEY,
+          systemProgram: SystemProgram.programId,
+          rent: SYSVAR_RENT_PUBKEY,
         },
         instructions: [
           await program.account.market.createInstruction(MARKET_KEYPAIR),
@@ -201,7 +262,9 @@ describe("onering-finance", () => {
 
   it("should mint 100 $1USD", async () => {
     await program.rpc.mint(
-      { amount: DEPOSIT_AMOUNT },
+      {
+        amount: DEPOSIT_AMOUNT,
+      },
       {
         accounts: {
           initializer: USER_KEYPAIR.publicKey,
@@ -234,7 +297,9 @@ describe("onering-finance", () => {
 
   it("should deposit (old stake) 100 $1USD", async () => {
     await program.rpc.deposit(
-      { amount: DEPOSIT_AMOUNT },
+      {
+        amount: DEPOSIT_AMOUNT,
+      },
       {
         accounts: {
           initializer: USER_KEYPAIR.publicKey,
@@ -253,8 +318,8 @@ describe("onering-finance", () => {
                 initializer: USER_KEYPAIR.publicKey,
                 reserve: reservePda,
                 state: STATE_KEYPAIR.publicKey,
-                systemProgram: web3.SystemProgram.programId,
-                rent: web3.SYSVAR_RENT_PUBKEY,
+                systemProgram: SystemProgram.programId,
+                rent: SYSVAR_RENT_PUBKEY,
               },
             }
           ),
@@ -278,7 +343,9 @@ describe("onering-finance", () => {
 
   it("should withdraw (old unstake) 100 $1USD", async () => {
     await program.rpc.withdraw(
-      { amount: DEPOSIT_AMOUNT },
+      {
+        amount: DEPOSIT_AMOUNT,
+      },
       {
         accounts: {
           initializer: USER_KEYPAIR.publicKey,
@@ -307,13 +374,43 @@ describe("onering-finance", () => {
   });
 
   it("should redeem 100 $1USD", async () => {
+    try {
+      await program.rpc.redeem(
+        {
+          amount: DEPOSIT_AMOUNT,
+        },
+        {
+          accounts: {
+            initializer: USER_KEYPAIR.publicKey,
+            stableMint: stableMint.publicKey,
+            stableVault: stableVaultPda,
+            stableVaultAuth: wrongStableVaultAuthPda,
+            initializerStableToken,
+            ousdMint: ousdMint.publicKey,
+            initializerOusdToken,
+            market: MARKET_KEYPAIR.publicKey,
+            state: STATE_KEYPAIR.publicKey,
+            tokenProgram: TOKEN_PROGRAM_ID,
+          },
+          signers: [USER_KEYPAIR],
+        }
+      );
+      assert.fail();
+    } catch (err) {
+      assert.equal(err.code, 2006);
+      assert.equal(err.msg, "A seeds constraint was violated");
+    }
+
     await program.rpc.redeem(
-      { amount: DEPOSIT_AMOUNT },
+      {
+        amount: DEPOSIT_AMOUNT,
+      },
       {
         accounts: {
           initializer: USER_KEYPAIR.publicKey,
           stableMint: stableMint.publicKey,
           stableVault: stableVaultPda,
+          stableVaultAuth: stableVaultAuthPda,
           initializerStableToken,
           ousdMint: ousdMint.publicKey,
           initializerOusdToken,
@@ -340,7 +437,9 @@ describe("onering-finance", () => {
 
   it("should mint & deposit (old stake) 100 $1USD", async () => {
     await program.rpc.mintAndDeposit(
-      { amount: DEPOSIT_AMOUNT },
+      {
+        amount: DEPOSIT_AMOUNT,
+      },
       {
         accounts: {
           initializer: USER_KEYPAIR.publicKey,
