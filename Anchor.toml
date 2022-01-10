@@ -1,8 +1,11 @@
-[programs.localnet]
-onering_finance = "oRnG11SQmnUr8QM3QS351ZG1dQcgNtvZhrMZCRA4CNf"
+[programs.mainnet]
+nanox_ico_dao = "RNGF2q87ouXMQGTxgcFPrxdUC2SFTx9HoBvhCSfpuUd"
 
 [programs.devnet]
-onering_finance = "oRnG11SQmnUr8QM3QS351ZG1dQcgNtvZhrMZCRA4CNf"
+onering_finance = "RNGF2q87ouXMQGTxgcFPrxdUC2SFTx9HoBvhCSfpuUd"
+
+[programs.localnet]
+onering_finance = "RNGF2q87ouXMQGTxgcFPrxdUC2SFTx9HoBvhCSfpuUd"
 
 [registry]
 url = "https://anchor.projectserum.com"

@@ -17,7 +17,7 @@ pub mod traits;
 
 use crate::{args::*, processor::*, traits::Processor};
 
-declare_id!("oRnG11SQmnUr8QM3QS351ZG1dQcgNtvZhrMZCRA4CNf");
+declare_id!("RNGF2q87ouXMQGTxgcFPrxdUC2SFTx9HoBvhCSfpuUd");
 
 #[program]
 pub mod onering_finance {
