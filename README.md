@@ -26,7 +26,7 @@ anchor deploy --provider.cluster devnet --provider.wallet ~/.config/solana/JBxid
 ```bash
 anchor upgrade --program-id RNGF2q87ouXMQGTxgcFPrxdUC2SFTx9HoBvhCSfpuUd \
     --provider.cluster devnet \
-    --provider.wallet ~/.config/solana/solana program show --buffers --all.json \
+    --provider.wallet ~/.config/solana/JBxidGWnhtPTGg8xw7sFT9tF4cfGtHnjYNp5GDJvGveh.json \
     ./target/deploy/onering_finance.so
 ```
 
