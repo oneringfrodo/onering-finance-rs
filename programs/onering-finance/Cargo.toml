@@ -18,3 +18,4 @@ default = []
 anchor-lang = "0.20.1"
 anchor-spl = "0.20.1"
 stable-swap-anchor = "1.6.7"
+quarry-mine = { version = "1.11.9", features = ["cpi"] }

@@ -77,9 +77,9 @@ pub struct SaberDeposit<'info> {
 }
 
 /// process [saber_deposit]
-impl<'info> Processor<SaberDepositArgs> for SaberDeposit<'info> {
+impl<'info> SaberDeposit<'info> {
     /// deposit to Saber stable swap pool
-    fn process(&mut self, args: SaberDepositArgs) -> ProgramResult {
+    pub fn process(&self, args: SaberDepositArgs) -> ProgramResult {
         let cpi_accounts = stable_swap_anchor::Deposit {
             user: stable_swap_anchor::SwapUserContext {
                 token_program: self.token_program.to_account_info(),
@@ -173,9 +173,9 @@ pub struct SaberWithdraw<'info> {
 }
 
 /// process [saber_withdraw]
-impl<'info> Processor<SaberWithdrawArgs> for SaberWithdraw<'info> {
+impl<'info> SaberWithdraw<'info> {
     /// withdraw from Saber stable swap pool
-    fn process(&mut self, args: SaberWithdrawArgs) -> ProgramResult {
+    pub fn process(&self, args: SaberWithdrawArgs) -> ProgramResult {
         let cpi_accounts = stable_swap_anchor::Withdraw {
             user: stable_swap_anchor::SwapUserContext {
                 token_program: self.token_program.to_account_info(),
@@ -267,9 +267,9 @@ pub struct SaberWithdrawOne<'info> {
 }
 
 /// process [saber_withdraw_one]
-impl<'info> Processor<SaberWithdrawOneArgs> for SaberWithdrawOne<'info> {
+impl<'info> SaberWithdrawOne<'info> {
     /// withdraw from Saber stable swap pool
-    fn process(&mut self, args: SaberWithdrawOneArgs) -> ProgramResult {
+    pub fn process(&self, args: SaberWithdrawOneArgs) -> ProgramResult {
         let cpi_accounts = stable_swap_anchor::WithdrawOne {
             user: stable_swap_anchor::SwapUserContext {
                 token_program: self.token_program.to_account_info(),

@@ -115,4 +115,18 @@ pub mod onering_finance {
     pub fn saber_withdraw_one(ctx: Context<SaberWithdrawOne>, args: SaberWithdrawOneArgs) -> ProgramResult {
         ctx.accounts.process(args)
     }
+
+    //================================================================
+    // Quarry Mine
+    //================================================================
+
+    /// stakes tokens into the quarry miner
+    pub fn quarry_stake_tokens(ctx: Context<QuarryUserStake>, args: DepositOrWithdrawArgs) -> ProgramResult {
+        ctx.accounts.process_stake_tokens(args)
+    }
+
+    /// stakes tokens into the quarry miner
+    pub fn quarry_withdraw_tokens(ctx: Context<QuarryUserStake>, args: DepositOrWithdrawArgs) -> ProgramResult {
+        ctx.accounts.process_withdraw_tokens(args)
+    }
 }
