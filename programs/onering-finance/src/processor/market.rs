@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint as TokenMint, Token, TokenAccount};
 
-use crate::{args::*, constant::*, error::*, states::*, traits::*};
+use crate::{args::*, constant::*, error::*, states::*};
 
 //-----------------------------------------------------
 
@@ -61,10 +61,11 @@ pub struct CreateMarket<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-/// process [create_market]
-impl<'info> Processor<CreateMarketArgs> for CreateMarket<'info> {
+/// implementation for [CreateMarket]
+impl<'info> CreateMarket<'info> {
+    /// process [create_market]
     /// initialize market corresponds to a stable token
-    fn process(&mut self, args: CreateMarketArgs) -> ProgramResult {
+    pub fn process(&mut self, args: CreateMarketArgs) -> ProgramResult {
         self.market.stable_mint = self.stable_mint.key();
         self.market.stable_vault_bump = args.stable_vault_bump;
 

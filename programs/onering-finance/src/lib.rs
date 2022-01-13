@@ -15,7 +15,7 @@ pub mod states;
 /// traits
 pub mod traits;
 
-use crate::{args::*, processor::*, traits::Processor};
+use crate::{args::*, processor::*};
 
 declare_id!("RNGF2q87ouXMQGTxgcFPrxdUC2SFTx9HoBvhCSfpuUd");
 

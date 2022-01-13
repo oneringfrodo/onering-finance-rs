@@ -109,12 +109,10 @@ impl<'info> Mint<'info> {
             )
         })
     }
-}
 
-/// process [mint]
-impl<'info> Processor<DepositOrWithdrawArgs> for Mint<'info> {
+    /// process [mint]
     /// deposit to the market
-    fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
+    pub fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
         // transfer stable token from initializer to vault
         self.transfer_to_vault(args.amount)?;
 
@@ -243,10 +241,11 @@ impl<'info> Redeem<'info> {
     }
 }
 
-/// process [redeem]
-impl<'info> Processor<DepositOrWithdrawArgs> for Redeem<'info> {
+/// implementation for [Redeem]
+impl<'info> Redeem<'info> {
+    /// process [redeem]
     /// redeem, burn correspond amount of 1USD
-    fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
+    pub fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
         // transfer stable token from vault to initializer
         self.transfer_to_initializer(args.amount)?;
 

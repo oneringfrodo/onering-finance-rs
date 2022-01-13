@@ -42,9 +42,10 @@ pub struct CreateReserve<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-/// process [create_reserve]
-impl<'info> Processor<CreateReserveArgs> for CreateReserve<'info> {
-    fn process(&mut self, args: CreateReserveArgs) -> ProgramResult {
+/// implementation for [CreateReserve]
+impl<'info> CreateReserve<'info> {
+    /// process [create_reserve]
+    pub fn process(&mut self, args: CreateReserveArgs) -> ProgramResult {
         self.reserve.nonce = args.nonce;
         self.reserve.deposit_amount = 0;
         self.reserve.reward_amount = 0;
@@ -119,12 +120,10 @@ impl<'info> Deposit<'info> {
             amount,
         )
     }
-}
 
-/// process [deposit]
-impl<'info> Processor<DepositOrWithdrawArgs> for Deposit<'info> {
+    /// process [deposit]
     /// deposit 1USD for reward (old stake)
-    fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
+    pub fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
         // initialize first update time
         if self.state.first_update_time == 0 {
             self.state.first_update_time = clock::Clock::get().unwrap().unix_timestamp;
@@ -228,13 +227,11 @@ impl<'info> MintAndDeposit<'info> {
             amount,
         )
     }
-}
 
-/// process [deposit_and_mint]
-impl<'info> Processor<DepositOrWithdrawArgs> for MintAndDeposit<'info> {
+    /// process [deposit_and_mint]
     /// deposit 1USD directly for reward (old stake)
     /// no actual mint needed
-    fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
+    pub fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
         // transfer stable token from initializer to vault
         self.transfer_to_vault(args.amount)?;
 
@@ -329,12 +326,10 @@ impl<'info> Withdraw<'info> {
             )
         })
     }
-}
 
-/// process [withdraw]
-impl<'info> Processor<DepositOrWithdrawArgs> for Withdraw<'info> {
+    /// process [withdraw]
     /// widthdraw, burn same amount of 1USD
-    fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
+    pub fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
         // refresh reserve state
         self.reserve.refresh_reserve(&mut self.state);
 
@@ -422,12 +417,10 @@ impl<'info> Claim<'info> {
             )
         })
     }
-}
 
-/// process [claim]
-impl<'info> Processor<DepositOrWithdrawArgs> for Claim<'info> {
+    /// process [claim]
     /// claim for rewards
-    fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
+    pub fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
         // refresh reserve state
         self.reserve.refresh_reserve(&mut self.state);
 
@@ -479,10 +472,11 @@ pub struct ClaimAndDeposit<'info> {
     pub token_program: Program<'info, Token>,
 }
 
-/// process [cliam_and_deposit]
-impl<'info> Processor<DepositOrWithdrawArgs> for ClaimAndDeposit<'info> {
+/// implementation for [ClaimAndDeposit]
+impl<'info> ClaimAndDeposit<'info> {
+    /// process [cliam_and_deposit]
     /// claim and deposit directly, transfer or burn not needed
-    fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
+    pub fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
         // refresh reserve state
         self.reserve.refresh_reserve(&mut self.state);
 
