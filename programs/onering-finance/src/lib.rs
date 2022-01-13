@@ -134,18 +134,18 @@ pub mod onering_finance {
     // Port Finance
     //================================================================
 
-    // /// deposit to port.finance lending pool
-    // pub fn port_deposit(ctx: Context<PortDeposit>, args: DepositOrWithdrawArgs) -> ProgramResult {
-    //     ctx.accounts.process(args)
-    // }
+    /// deposit to port.finance lending pool
+    pub fn port_deposit(ctx: Context<PortDeposit>, args: DepositOrWithdrawArgs) -> ProgramResult {
+        ctx.accounts.process(args)
+    }
 
-    // /// withdraw from port.finance lending pool
-    // pub fn port_withdraw(ctx: Context<PortWithdraw>, args: DepositOrWithdrawArgs) -> ProgramResult {
-    //     ctx.accounts.process(args)
-    // }
+    /// withdraw from port.finance lending pool
+    pub fn port_withdraw(ctx: Context<PortWithdraw>, args: DepositOrWithdrawArgs) -> ProgramResult {
+        ctx.accounts.process(args)
+    }
 
-    // /// claim for reward tokens
-    // pub fn port_claim_reward(ctx: Context<PortClaimReward>, args: DepositOrWithdrawArgs) -> ProgramResult {
-    //     ctx.accounts.process()
-    // }
+    /// claim for reward tokens
+    pub fn port_claim_reward(ctx: Context<PortClaimReward>) -> ProgramResult {
+        ctx.accounts.process()
+    }
 }
