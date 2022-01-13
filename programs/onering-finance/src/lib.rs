@@ -30,9 +30,9 @@ pub mod onering_finance {
     }
 
     /// apply new admin authority of main state
-    pub fn apply_new_admin(ctx: Context<ApplyNewAdmin>, args: ApplyNewAdminArgs) -> ProgramResult {
+    pub fn apply_new_admin(ctx: Context<ApplyNewAdmin>) -> ProgramResult {
         // TODO: validate main state address
-        ctx.accounts.process(args)
+        ctx.accounts.process()
     }
 
     /// update main state
@@ -129,4 +129,23 @@ pub mod onering_finance {
     pub fn quarry_withdraw_tokens(ctx: Context<QuarryUserStake>, args: DepositOrWithdrawArgs) -> ProgramResult {
         ctx.accounts.process_withdraw_tokens(args)
     }
+
+    //================================================================
+    // Port Finance
+    //================================================================
+
+    // /// deposit to port.finance lending pool
+    // pub fn port_deposit(ctx: Context<PortDeposit>, args: DepositOrWithdrawArgs) -> ProgramResult {
+    //     ctx.accounts.process(args)
+    // }
+
+    // /// withdraw from port.finance lending pool
+    // pub fn port_withdraw(ctx: Context<PortWithdraw>, args: DepositOrWithdrawArgs) -> ProgramResult {
+    //     ctx.accounts.process(args)
+    // }
+
+    // /// claim for reward tokens
+    // pub fn port_claim_reward(ctx: Context<PortClaimReward>, args: DepositOrWithdrawArgs) -> ProgramResult {
+    //     ctx.accounts.process()
+    // }
 }

@@ -28,9 +28,6 @@ pub struct CreateAdminArgs {
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, AnchorSerialize, AnchorDeserialize)]
-pub struct ApplyNewAdminArgs {}
-
-#[derive(Clone, Copy, Debug, Default, PartialEq, AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateStateArgs {
     pub emergency_flag: bool,
 }

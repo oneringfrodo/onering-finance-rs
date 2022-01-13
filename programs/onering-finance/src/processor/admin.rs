@@ -63,7 +63,7 @@ pub struct ApplyNewAdmin<'info> {
 /// implementation for [ApplyNewAdmin]
 impl<'info> ApplyNewAdmin<'info> {
     /// process [apply_new_admin]
-    pub fn process(&mut self, _args: ApplyNewAdminArgs) -> ProgramResult {
+    pub fn process(&mut self) -> ProgramResult {
         self.state.admin = self.new_admin.key();
 
         Ok(())

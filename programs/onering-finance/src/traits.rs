@@ -1,5 +1,3 @@
-use anchor_lang::prelude::*;
-
 pub trait MintAuthority {
     fn with_mint_auth_seeds<R, F: FnOnce(&[&[u8]]) -> R>(&self, f: F) -> R;
 }
