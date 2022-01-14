@@ -98,7 +98,7 @@ pub mod onering_finance {
     }
 
     //================================================================
-    // Saber Stable Swap
+    // Saber Stable Swap - AMM
     //================================================================
 
     /// deposit to Saber stable swap pool
@@ -117,7 +117,7 @@ pub mod onering_finance {
     }
 
     //================================================================
-    // Quarry Mine
+    // Quarry Mine - APY farm
     //================================================================
 
     /// stakes tokens into the quarry miner
@@ -131,7 +131,7 @@ pub mod onering_finance {
     }
 
     //================================================================
-    // Port Finance
+    // Port Finance - Lending Pool
     //================================================================
 
     /// deposit to port.finance lending pool
