@@ -19,13 +19,14 @@ anchor test
 
 ## Deploy program
 ```bash
-anchor deploy --provider.cluster devnet --provider.wallet ~/.config/solana/JBxidGWnhtPTGg8xw7sFT9tF4cfGtHnjYNp5GDJvGveh.json
+anchor deploy --provider.cluster devnet \
+    --provider.wallet ~/.config/solana/JBxidGWnhtPTGg8xw7sFT9tF4cfGtHnjYNp5GDJvGveh.json
 ```
 
 ## Upgrade program
 ```bash
-anchor upgrade --program-id RNGF2q87ouXMQGTxgcFPrxdUC2SFTx9HoBvhCSfpuUd \
-    --provider.cluster devnet \
+anchor upgrade --provider.cluster devnet \
+    --program-id RNGF2q87ouXMQGTxgcFPrxdUC2SFTx9HoBvhCSfpuUd \
     --provider.wallet ~/.config/solana/JBxidGWnhtPTGg8xw7sFT9tF4cfGtHnjYNp5GDJvGveh.json \
     ./target/deploy/onering_finance.so
 ```
