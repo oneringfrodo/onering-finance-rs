@@ -17,7 +17,10 @@ module.exports = {
     sourceType: "module",
   },
   plugins: ["@typescript-eslint"],
-  rules: {},
+  rules: {
+    "node/no-unpublished-import": "off",
+    "node/no-unsupported-features/es-syntax": "off",
+  },
   overrides: [
     {
       files: ["tests/**"],
@@ -25,13 +28,6 @@ module.exports = {
         camelcase: "off",
         "node/no-missing-import": "off",
         "@typescript-eslint/no-explicit-any": "off",
-      },
-    },
-    {
-      files: ["migrations/**", "tests/**"],
-      rules: {
-        "node/no-unpublished-import": "off",
-        "node/no-unsupported-features/es-syntax": "off",
       },
     },
   ],
