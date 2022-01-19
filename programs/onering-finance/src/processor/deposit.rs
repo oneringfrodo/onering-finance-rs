@@ -1,5 +1,5 @@
 use anchor_lang::{prelude::*, solana_program::clock};
-use anchor_spl::token::{self, Burn, Mint as TokenMint, MintTo, Token, TokenAccount, Transfer};
+use anchor_spl::token::{self, Burn, Mint, MintTo, Token, TokenAccount, Transfer};
 use std::mem::size_of;
 
 use crate::{args::*, constant::*, error::*, states::*, traits::*};
@@ -37,9 +37,6 @@ pub struct CreateReserve<'info> {
 
     /// system program
     pub system_program: Program<'info, System>,
-
-    /// rent var
-    pub rent: Sysvar<'info, Rent>,
 }
 
 /// implementation for [CreateReserve]
@@ -70,7 +67,7 @@ pub struct Deposit<'info> {
         mut,
         constraint = ousd_mint.key().eq(&state.ousd_mint) @ CommonError::InvalidOusdMint,
     )]
-    pub ousd_mint: Box<Account<'info, TokenMint>>,
+    pub ousd_mint: Box<Account<'info, Mint>>,
 
     /// 1USD token
     #[account(
@@ -158,7 +155,7 @@ pub struct MintAndDeposit<'info> {
     #[account(
         constraint = stable_mint.key().eq(&market.stable_mint) @ CommonError::InvalidStableMint,
     )]
-    pub stable_mint: Box<Account<'info, TokenMint>>,
+    pub stable_mint: Box<Account<'info, Mint>>,
 
     /// stable vault
     #[account(
@@ -181,6 +178,13 @@ pub struct MintAndDeposit<'info> {
         constraint = initializer_stable_token.amount >= args.amount @ CommonError::InsufficientStableBalance,
     )]
     pub initializer_stable_token: Box<Account<'info, TokenAccount>>,
+
+    /// 1USD mint, collateral asset
+    #[account(
+        mut,
+        constraint = ousd_mint.key().eq(&state.ousd_mint) @ CommonError::InvalidOusdMint,
+    )]
+    pub ousd_mint: Box<Account<'info, Mint>>,
 
     /// reserve state
     #[account(
@@ -235,6 +239,23 @@ impl<'info> MintAndDeposit<'info> {
         // transfer stable token from initializer to vault
         self.transfer_to_vault(args.amount)?;
 
+        // $1USD amount equivalant to stable token amount
+        let ousd_amount = if self.stable_mint.decimals > self.ousd_mint.decimals {
+            args.amount
+                / u64::pow(
+                    10,
+                    (self.stable_mint.decimals - self.ousd_mint.decimals) as u32,
+                )
+        } else if self.stable_mint.decimals < self.ousd_mint.decimals {
+            args.amount
+                * u64::pow(
+                    10,
+                    (self.ousd_mint.decimals - self.stable_mint.decimals) as u32,
+                )
+        } else {
+            args.amount
+        };
+
         // initialize first update time
         if self.state.first_update_time == 0 {
             self.state.first_update_time = clock::Clock::get().unwrap().unix_timestamp;
@@ -244,10 +265,10 @@ impl<'info> MintAndDeposit<'info> {
         self.reserve.refresh_reserve(&mut self.state);
 
         // accumulate deposit amount of any stable tokens
-        self.reserve.deposit_amount += args.amount;
+        self.reserve.deposit_amount += ousd_amount;
 
         // add stake liquidity, used to calculate rewards
-        self.state.deposit_amount += args.amount;
+        self.state.deposit_amount += ousd_amount;
 
         Ok(())
     }
@@ -267,7 +288,7 @@ pub struct Withdraw<'info> {
         mut,
         constraint = ousd_mint.key().eq(&state.ousd_mint) @ CommonError::InvalidOusdMint,
     )]
-    pub ousd_mint: Box<Account<'info, TokenMint>>,
+    pub ousd_mint: Box<Account<'info, Mint>>,
 
     /// 1USD mint authority
     pub ousd_mint_auth: UncheckedAccount<'info>,
@@ -359,7 +380,7 @@ pub struct Claim<'info> {
     #[account(
         constraint = ousd_mint.key().eq(&state.ousd_mint) @ CommonError::InvalidOusdMint,
     )]
-    pub ousd_mint: Box<Account<'info, TokenMint>>,
+    pub ousd_mint: Box<Account<'info, Mint>>,
 
     /// 1USD mint authority
     pub ousd_mint_auth: UncheckedAccount<'info>,

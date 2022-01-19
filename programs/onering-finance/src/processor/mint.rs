@@ -1,14 +1,14 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Burn, Mint as TokenMint, MintTo, Token, TokenAccount, Transfer};
+use anchor_spl::token::{self, Burn, Mint, MintTo, Token, TokenAccount, Transfer};
 
 use crate::{args::*, constant::*, error::*, states::*, traits::*};
 
 //-----------------------------------------------------
 
-/// accounts for [mint]
+/// accounts for [mint_ousd]
 #[derive(Accounts)]
 #[instruction(args: DepositOrWithdrawArgs)]
-pub struct Mint<'info> {
+pub struct MintOusd<'info> {
     /// user, mint initializer
     pub initializer: Signer<'info>,
 
@@ -16,7 +16,7 @@ pub struct Mint<'info> {
     #[account(
         constraint = stable_mint.key().eq(&market.stable_mint) @ CommonError::InvalidStableMint,
     )]
-    pub stable_mint: Box<Account<'info, TokenMint>>,
+    pub stable_mint: Box<Account<'info, Mint>>,
 
     /// stable vault
     #[account(
@@ -45,7 +45,7 @@ pub struct Mint<'info> {
         mut,
         constraint = ousd_mint.key().eq(&state.ousd_mint) @ CommonError::InvalidOusdMint,
     )]
-    pub ousd_mint: Box<Account<'info, TokenMint>>,
+    pub ousd_mint: Box<Account<'info, Mint>>,
 
     /// 1USD mint authority
     pub ousd_mint_auth: UncheckedAccount<'info>,
@@ -74,8 +74,8 @@ pub struct Mint<'info> {
     pub token_program: Program<'info, Token>,
 }
 
-/// implementation for [Mint]
-impl<'info> Mint<'info> {
+/// implementation for [MintOusd]
+impl<'info> MintOusd<'info> {
     /// transfer stable token from initializer to vault
     pub fn transfer_to_vault(&self, amount: u64) -> ProgramResult {
         let cpi_accounts = Transfer {
@@ -116,8 +116,25 @@ impl<'info> Mint<'info> {
         // transfer stable token from initializer to vault
         self.transfer_to_vault(args.amount)?;
 
+        // $1USD amount equivalant to stable token amount
+        let ousd_amount = if self.stable_mint.decimals > self.ousd_mint.decimals {
+            args.amount
+                / u64::pow(
+                    10,
+                    (self.stable_mint.decimals - self.ousd_mint.decimals) as u32,
+                )
+        } else if self.stable_mint.decimals < self.ousd_mint.decimals {
+            args.amount
+                * u64::pow(
+                    10,
+                    (self.ousd_mint.decimals - self.stable_mint.decimals) as u32,
+                )
+        } else {
+            args.amount
+        };
+
         // mint deposit amount of 1USD to initializer
-        self.mint_to_initializer(args.amount)?;
+        self.mint_to_initializer(ousd_amount)?;
 
         Ok(())
     }
@@ -136,7 +153,7 @@ pub struct Redeem<'info> {
     #[account(
         constraint = stable_mint.key().eq(&market.stable_mint) @ CommonError::InvalidStableMint,
     )]
-    pub stable_mint: Box<Account<'info, TokenMint>>,
+    pub stable_mint: Box<Account<'info, Mint>>,
 
     /// stable vault
     #[account(
@@ -174,7 +191,7 @@ pub struct Redeem<'info> {
         mut,
         constraint = ousd_mint.key().eq(&state.ousd_mint) @ CommonError::InvalidOusdMint,
     )]
-    pub ousd_mint: Box<Account<'info, TokenMint>>,
+    pub ousd_mint: Box<Account<'info, Mint>>,
 
     /// 1USD token
     #[account(
@@ -246,8 +263,25 @@ impl<'info> Redeem<'info> {
     /// process [redeem]
     /// redeem, burn correspond amount of 1USD
     pub fn process(&mut self, args: DepositOrWithdrawArgs) -> ProgramResult {
+        // stable amount equivalant to $1USD token amount
+        let stable_amount = if self.stable_mint.decimals > self.ousd_mint.decimals {
+            args.amount
+                * u64::pow(
+                    10,
+                    (self.stable_mint.decimals - self.ousd_mint.decimals) as u32,
+                )
+        } else if self.stable_mint.decimals < self.ousd_mint.decimals {
+            args.amount
+                / u64::pow(
+                    10,
+                    (self.ousd_mint.decimals - self.stable_mint.decimals) as u32,
+                )
+        } else {
+            args.amount
+        };
+
         // transfer stable token from vault to initializer
-        self.transfer_to_initializer(args.amount)?;
+        self.transfer_to_initializer(stable_amount)?;
 
         // burn redeem amount of 1USD from initializer
         self.burn_from_initializer(args.amount)?;

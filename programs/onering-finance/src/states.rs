@@ -4,7 +4,7 @@ use crate::{constant::*, located::*, traits::*};
 
 //-----------------------------------------------------
 
-/// onering main state
+/// main state
 #[account]
 pub struct State {
     /// admin address, privileged access to market state
@@ -40,6 +40,7 @@ pub struct State {
     pub emergency_flag: bool,
 }
 
+/// mint authority seeds
 impl<T> MintAuthority for T
 where
     T: Located<State>,
@@ -53,6 +54,7 @@ where
     }
 }
 
+/// vault authority seeds
 impl<T> VaultAuthority for T
 where
     T: Located<State>,
@@ -68,7 +70,7 @@ where
 
 //-----------------------------------------------------
 
-/// Market state corresponds to a stable token
+/// market state corresponds to a stable token
 #[account]
 pub struct Market {
     /// stable mint; USDC, USDt, etc.,
@@ -86,7 +88,7 @@ pub struct Market {
 
 //-----------------------------------------------------
 
-/// Reserve account
+/// reserve state
 #[account]
 pub struct Reserve {
     /// bump seed for reserve PDA

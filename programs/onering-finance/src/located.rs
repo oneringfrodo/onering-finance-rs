@@ -2,7 +2,7 @@ use std::ops::DerefMut;
 
 use anchor_lang::prelude::*;
 
-/// Parsed account together with location key concept.
+/// parsed account with location key
 pub trait Located<T> {
     fn as_ref(&self) -> &T;
     fn as_mut(&mut self) -> &mut T;

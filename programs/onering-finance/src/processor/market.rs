@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint as TokenMint, Token, TokenAccount};
+use anchor_spl::token::{Mint, Token, TokenAccount};
 
 use crate::{args::*, constant::*, error::*, states::*};
 
@@ -14,7 +14,7 @@ pub struct CreateMarket<'info> {
     pub admin: Signer<'info>,
 
     /// stable mint
-    pub stable_mint: Box<Account<'info, TokenMint>>,
+    pub stable_mint: Box<Account<'info, Mint>>,
 
     /// stable vault
     #[account(

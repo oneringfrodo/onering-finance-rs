@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::Mint as TokenMint;
+use anchor_spl::token::Mint;
 
 use crate::{args::*, error::*, states::*};
 
@@ -12,9 +12,9 @@ pub struct CreateAdmin<'info> {
     pub admin: Signer<'info>,
 
     /// 1USD mint, collateral asset
-    pub ousd_mint: Box<Account<'info, TokenMint>>,
+    pub ousd_mint: Box<Account<'info, Mint>>,
 
-    /// onering main state
+    /// main state
     #[account(zero)]
     pub state: Box<Account<'info, State>>,
 }
@@ -52,7 +52,7 @@ pub struct ApplyNewAdmin<'info> {
     /// new admin
     pub new_admin: UncheckedAccount<'info>,
 
-    /// onering main state
+    /// main state
     #[account(
         mut,
         has_one = admin @ CommonError::AccessDenied,

@@ -102,7 +102,7 @@ describe("onering-finance", () => {
       FEE_PAYER_KEYPAIR,
       ousdMintAuthPda,
       null,
-      6,
+      9,
       TOKEN_PROGRAM_ID
     );
 
@@ -261,7 +261,7 @@ describe("onering-finance", () => {
   });
 
   it("should mint 100 $1USD", async () => {
-    await program.rpc.mint(
+    await program.rpc.mintOusd(
       {
         amount: DEPOSIT_AMOUNT,
       },
@@ -292,13 +292,13 @@ describe("onering-finance", () => {
     const initializerOusdTokenAccount = await ousdMint.getAccountInfo(
       initializerOusdToken
     );
-    assert.ok(initializerOusdTokenAccount.amount.eq(DEPOSIT_AMOUNT));
+    assert.ok(initializerOusdTokenAccount.amount.eq(DEPOSIT_AMOUNT.muln(1_000)));
   });
 
   it("should deposit (old stake) 100 $1USD", async () => {
     await program.rpc.deposit(
       {
-        amount: DEPOSIT_AMOUNT,
+        amount: DEPOSIT_AMOUNT.muln(1_000),
       },
       {
         accounts: {
@@ -319,7 +319,6 @@ describe("onering-finance", () => {
                 reserve: reservePda,
                 state: STATE_KEYPAIR.publicKey,
                 systemProgram: SystemProgram.programId,
-                rent: SYSVAR_RENT_PUBKEY,
               },
             }
           ),
@@ -331,10 +330,10 @@ describe("onering-finance", () => {
     // asserts
     const reserve = await program.account.reserve.fetch(reservePda);
     assert.ok(reserve.nonce === reserveBump);
-    assert.ok(reserve.depositAmount.eq(DEPOSIT_AMOUNT));
+    assert.ok(reserve.depositAmount.eq(DEPOSIT_AMOUNT.muln(1_000)));
     assert.ok(!reserve.freezeFlag);
     const state = await program.account.state.fetch(STATE_KEYPAIR.publicKey);
-    assert.ok(state.depositAmount.eq(DEPOSIT_AMOUNT));
+    assert.ok(state.depositAmount.eq(DEPOSIT_AMOUNT.muln(1_000)));
     const initializerOusdTokenAccount = await ousdMint.getAccountInfo(
       initializerOusdToken
     );
@@ -344,7 +343,7 @@ describe("onering-finance", () => {
   it("should withdraw (old unstake) 100 $1USD", async () => {
     await program.rpc.withdraw(
       {
-        amount: DEPOSIT_AMOUNT,
+        amount: DEPOSIT_AMOUNT.muln(1_000),
       },
       {
         accounts: {
@@ -370,14 +369,14 @@ describe("onering-finance", () => {
     const initializerOusdTokenAccount = await ousdMint.getAccountInfo(
       initializerOusdToken
     );
-    assert.ok(initializerOusdTokenAccount.amount.eq(DEPOSIT_AMOUNT));
+    assert.ok(initializerOusdTokenAccount.amount.eq(DEPOSIT_AMOUNT.muln(1_000)));
   });
 
   it("should redeem 100 $1USD", async () => {
     try {
       await program.rpc.redeem(
         {
-          amount: DEPOSIT_AMOUNT,
+          amount: DEPOSIT_AMOUNT.muln(1_000),
         },
         {
           accounts: {
@@ -403,7 +402,7 @@ describe("onering-finance", () => {
 
     await program.rpc.redeem(
       {
-        amount: DEPOSIT_AMOUNT,
+        amount: DEPOSIT_AMOUNT.muln(1_000),
       },
       {
         accounts: {
@@ -446,6 +445,7 @@ describe("onering-finance", () => {
           stableMint: stableMint.publicKey,
           stableVault: stableVaultPda,
           initializerStableToken,
+          ousdMint: ousdMint.publicKey,
           reserve: reservePda,
           market: MARKET_KEYPAIR.publicKey,
           state: STATE_KEYPAIR.publicKey,
@@ -458,10 +458,10 @@ describe("onering-finance", () => {
     // asserts
     const reserve = await program.account.reserve.fetch(reservePda);
     assert.ok(reserve.nonce === reserveBump);
-    assert.ok(reserve.depositAmount.eq(DEPOSIT_AMOUNT));
+    assert.ok(reserve.depositAmount.eq(DEPOSIT_AMOUNT.muln(1_000)));
     assert.ok(!reserve.freezeFlag);
     const state = await program.account.state.fetch(STATE_KEYPAIR.publicKey);
-    assert.ok(state.depositAmount.eq(DEPOSIT_AMOUNT));
+    assert.ok(state.depositAmount.eq(DEPOSIT_AMOUNT.muln(1_000)));
     const stableVaultAccount = await stableMint.getAccountInfo(stableVaultPda);
     assert.ok(stableVaultAccount.amount.eq(DEPOSIT_AMOUNT));
     const initializerStableTokenAccount = await stableMint.getAccountInfo(

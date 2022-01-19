@@ -1,18 +1,12 @@
 use anchor_lang::prelude::*;
 
-/// args
 pub mod args;
-/// constant
 pub mod constant;
-/// error
 pub mod error;
-/// located
+pub mod event;
 pub mod located;
-/// processor
 pub mod processor;
-/// states
 pub mod states;
-/// traits
 pub mod traits;
 
 use crate::{args::*, processor::*};
@@ -49,7 +43,7 @@ pub mod onering_finance {
     }
 
     /// mint 1USD token in any stable tokens available
-    pub fn mint(ctx: Context<Mint>, args: DepositOrWithdrawArgs) -> ProgramResult {
+    pub fn mint_ousd(ctx: Context<MintOusd>, args: DepositOrWithdrawArgs) -> ProgramResult {
         // TODO: validate market state address
         ctx.accounts.process(args)
     }
