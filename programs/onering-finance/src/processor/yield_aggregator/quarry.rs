@@ -3,15 +3,15 @@ use anchor_spl::token::Token;
 
 use crate::{args::*, error::*, states::*, traits::*};
 
-#[derive(Accounts, Clone)]
+#[derive(Accounts)]
 pub struct QuarryUserStake<'info> {
     /// admin
     pub admin: Signer<'info>,
 
     /// main state
     #[account(
-        has_one = admin @ CommonError::AccessDenied,
-        constraint = !state.emergency_flag @ CommonError::ServiceDisabled,
+        has_one = admin @ OneRingFinanceError::AccessDenied,
+        constraint = !state.emergency_flag @ OneRingFinanceError::ServiceDisabled,
     )]
     pub state: Box<Account<'info, State>>,
 

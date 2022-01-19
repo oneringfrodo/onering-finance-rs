@@ -6,7 +6,7 @@ use crate::{args::*, error::*, states::*, traits::*};
 //-----------------------------------------------------
 
 /// accounts for [PortDeposit]
-#[derive(Accounts, Clone)]
+#[derive(Accounts)]
 pub struct PortDeposit<'info> {
     /// admin
     #[account(mut)]
@@ -14,8 +14,8 @@ pub struct PortDeposit<'info> {
 
     /// main state
     #[account(
-        has_one = admin @ CommonError::AccessDenied,
-        constraint = !state.emergency_flag @ CommonError::ServiceDisabled,
+        has_one = admin @ OneRingFinanceError::AccessDenied,
+        constraint = !state.emergency_flag @ OneRingFinanceError::ServiceDisabled,
     )]
     pub state: Box<Account<'info, State>>,
 
@@ -43,7 +43,7 @@ pub struct PortDeposit<'info> {
 
 /// implementation for [PortDeposit]
 impl<'info> PortDeposit<'info> {
-    /// process [deposit]
+    /// process [deposit_reserve]
     pub fn process(&self, args: DepositOrWithdrawArgs) -> ProgramResult {
         let cpi_accounts = port_anchor_adaptor::Deposit {
             source_liquidity: self.source_liquidity.to_account_info(),
@@ -72,6 +72,89 @@ impl<'info> PortDeposit<'info> {
 
 //-----------------------------------------------------
 
+/// accounts for [PortDepositAndCollateralize]
+#[derive(Accounts)]
+pub struct PortDepositAndCollateralize<'info> {
+    /// admin
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    /// main state
+    #[account(
+        has_one = admin @ OneRingFinanceError::AccessDenied,
+        constraint = !state.emergency_flag @ OneRingFinanceError::ServiceDisabled,
+    )]
+    pub state: Box<Account<'info, State>>,
+
+    /// port finance program
+    pub port_finance_program: UncheckedAccount<'info>,
+
+    // cpi accounts below
+    #[account(mut)]
+    pub source_liquidity: UncheckedAccount<'info>,
+    #[account(mut)]
+    pub user_collateral: UncheckedAccount<'info>,
+    #[account(mut)]
+    pub reserve: UncheckedAccount<'info>,
+    #[account(mut)]
+    pub reserve_liquidity_supply: UncheckedAccount<'info>,
+    #[account(mut)]
+    pub reserve_collateral_mint: UncheckedAccount<'info>,
+    #[account(mut)]
+    pub lending_market: UncheckedAccount<'info>,
+    pub lending_market_authority: UncheckedAccount<'info>,
+    #[account(mut)]
+    pub destination_collateral: UncheckedAccount<'info>,
+    #[account(mut)]
+    pub obligation: UncheckedAccount<'info>,
+    pub obligation_owner: UncheckedAccount<'info>,
+    #[account(mut)]
+    pub stake_account: UncheckedAccount<'info>,
+    pub staking_pool: UncheckedAccount<'info>,
+    #[account(mut)]
+    pub transfer_authority: UncheckedAccount<'info>,
+    pub clock: Sysvar<'info, Clock>,
+    pub token_program: Program<'info, Token>,
+    pub port_staking_program: UncheckedAccount<'info>,
+}
+
+/// implementation for [PortDepositAndCollateralize]
+impl<'info> PortDepositAndCollateralize<'info> {
+    /// process [deposit_and_collateralize]
+    pub fn process(&self, args: DepositOrWithdrawArgs) -> ProgramResult {
+        let cpi_accounts = port_anchor_adaptor::DepositAndCollateralize {
+            source_liquidity: self.source_liquidity.to_account_info(),
+            user_collateral: self.user_collateral.to_account_info(),
+            reserve: self.reserve.to_account_info(),
+            reserve_liquidity_supply: self.reserve_liquidity_supply.to_account_info(),
+            reserve_collateral_mint: self.reserve_collateral_mint.to_account_info(),
+            lending_market: self.lending_market.to_account_info(),
+            lending_market_authority: self.lending_market_authority.to_account_info(),
+            destination_collateral: self.destination_collateral.to_account_info(),
+            obligation: self.obligation.to_account_info(),
+            obligation_owner: self.obligation_owner.to_account_info(),
+            stake_account: self.stake_account.to_account_info(),
+            staking_pool: self.staking_pool.to_account_info(),
+            transfer_authority: self.transfer_authority.to_account_info(),
+            clock: self.clock.to_account_info(),
+            token_program: self.token_program.to_account_info(),
+            port_staking_program: self.port_staking_program.to_account_info(),
+        };
+
+        let cpi_context =
+            CpiContext::new(self.port_finance_program.to_account_info(), cpi_accounts);
+
+        self.state.with_vault_auth_seeds(|auth_seeds| {
+            port_anchor_adaptor::deposit_and_collateralize(
+                cpi_context.with_signer(&[auth_seeds]),
+                args.amount,
+            )
+        })
+    }
+}
+
+//-----------------------------------------------------
+
 /// accounts for [port_withdraw]
 #[derive(Accounts)]
 pub struct PortWithdraw<'info> {
@@ -81,8 +164,8 @@ pub struct PortWithdraw<'info> {
 
     /// main state
     #[account(
-        has_one = admin @ CommonError::AccessDenied,
-        constraint = !state.emergency_flag @ CommonError::ServiceDisabled,
+        has_one = admin @ OneRingFinanceError::AccessDenied,
+        constraint = !state.emergency_flag @ OneRingFinanceError::ServiceDisabled,
     )]
     pub state: Box<Account<'info, State>>,
 
@@ -147,8 +230,8 @@ pub struct PortClaimReward<'info> {
 
     /// main state
     #[account(
-        has_one = admin @ CommonError::AccessDenied,
-        constraint = !state.emergency_flag @ CommonError::ServiceDisabled,
+        has_one = admin @ OneRingFinanceError::AccessDenied,
+        constraint = !state.emergency_flag @ OneRingFinanceError::ServiceDisabled,
     )]
     pub state: Box<Account<'info, State>>,
 

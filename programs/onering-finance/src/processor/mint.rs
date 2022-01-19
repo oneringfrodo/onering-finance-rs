@@ -14,7 +14,7 @@ pub struct MintOusd<'info> {
 
     /// stable mint
     #[account(
-        constraint = stable_mint.key().eq(&market.stable_mint) @ CommonError::InvalidStableMint,
+        constraint = stable_mint.key().eq(&market.stable_mint) @ OneRingFinanceError::InvalidStableMint,
     )]
     pub stable_mint: Box<Account<'info, Mint>>,
 
@@ -27,23 +27,23 @@ pub struct MintOusd<'info> {
             market.key().as_ref()
         ],
         bump = market.stable_vault_bump,
-        constraint = stable_vault.mint.eq(&stable_mint.key()) @ CommonError::InvalidStableMint,
+        constraint = stable_vault.mint.eq(&stable_mint.key()) @ OneRingFinanceError::InvalidStableMint,
     )]
     pub stable_vault: Box<Account<'info, TokenAccount>>,
 
     /// stable token
     #[account(
         mut,
-        constraint = initializer_stable_token.owner.eq(initializer.key) @ CommonError::InvalidStableAccountOwner,
-        constraint = initializer_stable_token.mint.eq(&stable_mint.key()) @ CommonError::InvalidStableMint,
-        constraint = initializer_stable_token.amount >= args.amount @ CommonError::InsufficientStableBalance,
+        constraint = initializer_stable_token.owner.eq(initializer.key) @ OneRingFinanceError::InvalidStableAccountOwner,
+        constraint = initializer_stable_token.mint.eq(&stable_mint.key()) @ OneRingFinanceError::InvalidStableMint,
+        constraint = initializer_stable_token.amount >= args.amount @ OneRingFinanceError::InsufficientStableBalance,
     )]
     pub initializer_stable_token: Box<Account<'info, TokenAccount>>,
 
     /// 1USD mint, collateral asset
     #[account(
         mut,
-        constraint = ousd_mint.key().eq(&state.ousd_mint) @ CommonError::InvalidOusdMint,
+        constraint = ousd_mint.key().eq(&state.ousd_mint) @ OneRingFinanceError::InvalidOusdMint,
     )]
     pub ousd_mint: Box<Account<'info, Mint>>,
 
@@ -53,20 +53,20 @@ pub struct MintOusd<'info> {
     /// 1USD token
     #[account(
         mut,
-        constraint = initializer_ousd_token.owner.eq(initializer.key) @ CommonError::InvalidOusdAccountOwner,
-        constraint = initializer_ousd_token.mint.eq(&ousd_mint.key()) @ CommonError::InvalidOusdMint,
+        constraint = initializer_ousd_token.owner.eq(initializer.key) @ OneRingFinanceError::InvalidOusdAccountOwner,
+        constraint = initializer_ousd_token.mint.eq(&ousd_mint.key()) @ OneRingFinanceError::InvalidOusdMint,
     )]
     pub initializer_ousd_token: Box<Account<'info, TokenAccount>>,
 
     /// market state
     #[account(
-        constraint = !market.lock_flag @ CommonError::MarketLocked,
+        constraint = !market.lock_flag @ OneRingFinanceError::MarketLocked,
     )]
     pub market: Box<Account<'info, Market>>,
 
     /// main state
     #[account(
-        constraint = !state.emergency_flag @ CommonError::ServiceDisabled,
+        constraint = !state.emergency_flag @ OneRingFinanceError::ServiceDisabled,
     )]
     pub state: Box<Account<'info, State>>,
 
@@ -151,7 +151,7 @@ pub struct Redeem<'info> {
 
     /// stable mint
     #[account(
-        constraint = stable_mint.key().eq(&market.stable_mint) @ CommonError::InvalidStableMint,
+        constraint = stable_mint.key().eq(&market.stable_mint) @ OneRingFinanceError::InvalidStableMint,
     )]
     pub stable_mint: Box<Account<'info, Mint>>,
 
@@ -164,7 +164,7 @@ pub struct Redeem<'info> {
             market.key().as_ref()
         ],
         bump = market.stable_vault_bump,
-        constraint = stable_vault.mint.eq(&stable_mint.key()) @ CommonError::InvalidStableMint,
+        constraint = stable_vault.mint.eq(&stable_mint.key()) @ OneRingFinanceError::InvalidStableMint,
     )]
     pub stable_vault: Box<Account<'info, TokenAccount>>,
 
@@ -181,24 +181,24 @@ pub struct Redeem<'info> {
     /// stable token
     #[account(
         mut,
-        constraint = initializer_stable_token.owner.eq(initializer.key) @ CommonError::InvalidStableAccountOwner,
-        constraint = initializer_stable_token.mint.eq(&stable_mint.key()) @ CommonError::InvalidStableMint,
+        constraint = initializer_stable_token.owner.eq(initializer.key) @ OneRingFinanceError::InvalidStableAccountOwner,
+        constraint = initializer_stable_token.mint.eq(&stable_mint.key()) @ OneRingFinanceError::InvalidStableMint,
     )]
     pub initializer_stable_token: Box<Account<'info, TokenAccount>>,
 
     /// 1USD mint, collateral asset
     #[account(
         mut,
-        constraint = ousd_mint.key().eq(&state.ousd_mint) @ CommonError::InvalidOusdMint,
+        constraint = ousd_mint.key().eq(&state.ousd_mint) @ OneRingFinanceError::InvalidOusdMint,
     )]
     pub ousd_mint: Box<Account<'info, Mint>>,
 
     /// 1USD token
     #[account(
         mut,
-        constraint = initializer_ousd_token.owner.eq(initializer.key) @ CommonError::InvalidOusdAccountOwner,
-        constraint = initializer_ousd_token.mint.eq(&ousd_mint.key()) @ CommonError::InvalidOusdMint,
-        constraint = initializer_ousd_token.amount >= args.amount @ CommonError::InsufficientOusdBalance,
+        constraint = initializer_ousd_token.owner.eq(initializer.key) @ OneRingFinanceError::InvalidOusdAccountOwner,
+        constraint = initializer_ousd_token.mint.eq(&ousd_mint.key()) @ OneRingFinanceError::InvalidOusdMint,
+        constraint = initializer_ousd_token.amount >= args.amount @ OneRingFinanceError::InsufficientOusdBalance,
     )]
     pub initializer_ousd_token: Box<Account<'info, TokenAccount>>,
 
@@ -206,14 +206,14 @@ pub struct Redeem<'info> {
     #[account(
         // TODO: redeem logic TBD
         // mut,
-        // constraint = market.withdrawal_liq >= args.amount @ CommonError::InsufficientWithdrawalLiquidity,
-        constraint = !market.lock_flag @ CommonError::MarketLocked,
+        // constraint = market.withdrawal_liq >= args.amount @ OneRingFinanceError::InsufficientWithdrawalLiquidity,
+        constraint = !market.lock_flag @ OneRingFinanceError::MarketLocked,
     )]
     pub market: Box<Account<'info, Market>>,
 
     /// main state
     #[account(
-        constraint = !state.emergency_flag @ CommonError::ServiceDisabled,
+        constraint = !state.emergency_flag @ OneRingFinanceError::ServiceDisabled,
     )]
     pub state: Box<Account<'info, State>>,
 

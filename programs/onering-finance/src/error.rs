@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 
 #[error]
-pub enum CommonError {
+pub enum OneRingFinanceError {
     #[msg("Access denied")]
     AccessDenied,
 

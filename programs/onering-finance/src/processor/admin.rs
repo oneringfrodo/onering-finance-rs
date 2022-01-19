@@ -55,7 +55,7 @@ pub struct ApplyNewAdmin<'info> {
     /// main state
     #[account(
         mut,
-        has_one = admin @ CommonError::AccessDenied,
+        has_one = admin @ OneRingFinanceError::AccessDenied,
     )]
     pub state: Box<Account<'info, State>>,
 }
@@ -81,7 +81,7 @@ pub struct UpdateState<'info> {
     /// global state
     #[account(
         mut,
-        has_one = admin @ CommonError::AccessDenied,
+        has_one = admin @ OneRingFinanceError::AccessDenied,
     )]
     pub state: Box<Account<'info, State>>,
 }

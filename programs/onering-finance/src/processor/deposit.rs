@@ -31,7 +31,7 @@ pub struct CreateReserve<'info> {
     /// main state
     #[account(
         mut,
-        constraint = !state.emergency_flag @ CommonError::ServiceDisabled,
+        constraint = !state.emergency_flag @ OneRingFinanceError::ServiceDisabled,
     )]
     pub state: Box<Account<'info, State>>,
 
@@ -65,16 +65,16 @@ pub struct Deposit<'info> {
     /// 1USD mint, collateral asset
     #[account(
         mut,
-        constraint = ousd_mint.key().eq(&state.ousd_mint) @ CommonError::InvalidOusdMint,
+        constraint = ousd_mint.key().eq(&state.ousd_mint) @ OneRingFinanceError::InvalidOusdMint,
     )]
     pub ousd_mint: Box<Account<'info, Mint>>,
 
     /// 1USD token
     #[account(
         mut,
-        constraint = initializer_ousd_token.owner.eq(initializer.key) @ CommonError::InvalidOusdAccountOwner,
-        constraint = initializer_ousd_token.mint.eq(&ousd_mint.key()) @ CommonError::InvalidOusdMint,
-        constraint = initializer_ousd_token.amount >= args.amount @ CommonError::InsufficientOusdBalance,
+        constraint = initializer_ousd_token.owner.eq(initializer.key) @ OneRingFinanceError::InvalidOusdAccountOwner,
+        constraint = initializer_ousd_token.mint.eq(&ousd_mint.key()) @ OneRingFinanceError::InvalidOusdMint,
+        constraint = initializer_ousd_token.amount >= args.amount @ OneRingFinanceError::InsufficientOusdBalance,
     )]
     pub initializer_ousd_token: Box<Account<'info, TokenAccount>>,
 
@@ -87,14 +87,14 @@ pub struct Deposit<'info> {
             state.key().as_ref(),
         ],
         bump = reserve.nonce,
-        constraint = !reserve.freeze_flag @ CommonError::ReserveFrozen,
+        constraint = !reserve.freeze_flag @ OneRingFinanceError::ReserveFrozen,
     )]
     pub reserve: Box<Account<'info, Reserve>>,
 
     /// main state
     #[account(
         mut,
-        constraint = !state.emergency_flag @ CommonError::ServiceDisabled,
+        constraint = !state.emergency_flag @ OneRingFinanceError::ServiceDisabled,
     )]
     pub state: Box<Account<'info, State>>,
 
@@ -153,7 +153,7 @@ pub struct MintAndDeposit<'info> {
 
     /// stable mint
     #[account(
-        constraint = stable_mint.key().eq(&market.stable_mint) @ CommonError::InvalidStableMint,
+        constraint = stable_mint.key().eq(&market.stable_mint) @ OneRingFinanceError::InvalidStableMint,
     )]
     pub stable_mint: Box<Account<'info, Mint>>,
 
@@ -166,23 +166,23 @@ pub struct MintAndDeposit<'info> {
             market.key().as_ref()
         ],
         bump = market.stable_vault_bump,
-        constraint = stable_vault.mint.eq(&stable_mint.key()) @ CommonError::InvalidStableMint,
+        constraint = stable_vault.mint.eq(&stable_mint.key()) @ OneRingFinanceError::InvalidStableMint,
     )]
     pub stable_vault: Box<Account<'info, TokenAccount>>,
 
     /// stable token
     #[account(
         mut,
-        constraint = initializer_stable_token.owner.eq(initializer.key) @ CommonError::InvalidStableAccountOwner,
-        constraint = initializer_stable_token.mint.eq(&stable_mint.key()) @ CommonError::InvalidStableMint,
-        constraint = initializer_stable_token.amount >= args.amount @ CommonError::InsufficientStableBalance,
+        constraint = initializer_stable_token.owner.eq(initializer.key) @ OneRingFinanceError::InvalidStableAccountOwner,
+        constraint = initializer_stable_token.mint.eq(&stable_mint.key()) @ OneRingFinanceError::InvalidStableMint,
+        constraint = initializer_stable_token.amount >= args.amount @ OneRingFinanceError::InsufficientStableBalance,
     )]
     pub initializer_stable_token: Box<Account<'info, TokenAccount>>,
 
     /// 1USD mint, collateral asset
     #[account(
         mut,
-        constraint = ousd_mint.key().eq(&state.ousd_mint) @ CommonError::InvalidOusdMint,
+        constraint = ousd_mint.key().eq(&state.ousd_mint) @ OneRingFinanceError::InvalidOusdMint,
     )]
     pub ousd_mint: Box<Account<'info, Mint>>,
 
@@ -195,20 +195,20 @@ pub struct MintAndDeposit<'info> {
             state.key().as_ref(),
         ],
         bump = reserve.nonce,
-        constraint = !reserve.freeze_flag @ CommonError::ReserveFrozen,
+        constraint = !reserve.freeze_flag @ OneRingFinanceError::ReserveFrozen,
     )]
     pub reserve: Box<Account<'info, Reserve>>,
 
     /// market state
     #[account(
-        constraint = !market.lock_flag @ CommonError::MarketLocked,
+        constraint = !market.lock_flag @ OneRingFinanceError::MarketLocked,
     )]
     pub market: Box<Account<'info, Market>>,
 
     /// main state
     #[account(
         mut,
-        constraint = !state.emergency_flag @ CommonError::ServiceDisabled,
+        constraint = !state.emergency_flag @ OneRingFinanceError::ServiceDisabled,
     )]
     pub state: Box<Account<'info, State>>,
 
@@ -286,7 +286,7 @@ pub struct Withdraw<'info> {
     /// 1USD mint, collateral asset
     #[account(
         mut,
-        constraint = ousd_mint.key().eq(&state.ousd_mint) @ CommonError::InvalidOusdMint,
+        constraint = ousd_mint.key().eq(&state.ousd_mint) @ OneRingFinanceError::InvalidOusdMint,
     )]
     pub ousd_mint: Box<Account<'info, Mint>>,
 
@@ -296,8 +296,8 @@ pub struct Withdraw<'info> {
     /// 1USD token
     #[account(
         mut,
-        constraint = initializer_ousd_token.owner.eq(initializer.key) @ CommonError::InvalidOusdAccountOwner,
-        constraint = initializer_ousd_token.mint.eq(&ousd_mint.key()) @ CommonError::InvalidOusdMint,
+        constraint = initializer_ousd_token.owner.eq(initializer.key) @ OneRingFinanceError::InvalidOusdAccountOwner,
+        constraint = initializer_ousd_token.mint.eq(&ousd_mint.key()) @ OneRingFinanceError::InvalidOusdMint,
     )]
     pub initializer_ousd_token: Box<Account<'info, TokenAccount>>,
 
@@ -310,15 +310,15 @@ pub struct Withdraw<'info> {
             state.key().as_ref(),
         ],
         bump = reserve.nonce,
-        constraint = !reserve.freeze_flag @ CommonError::ReserveFrozen,
-        constraint = reserve.deposit_amount >= args.amount @ CommonError::WithdrawalAmountTooMuch,
+        constraint = !reserve.freeze_flag @ OneRingFinanceError::ReserveFrozen,
+        constraint = reserve.deposit_amount >= args.amount @ OneRingFinanceError::WithdrawalAmountTooMuch,
     )]
     pub reserve: Box<Account<'info, Reserve>>,
 
     /// main state
     #[account(
         mut,
-        constraint = !state.emergency_flag @ CommonError::ServiceDisabled,
+        constraint = !state.emergency_flag @ OneRingFinanceError::ServiceDisabled,
     )]
     pub state: Box<Account<'info, State>>,
 
@@ -378,7 +378,7 @@ pub struct Claim<'info> {
 
     /// 1USD mint, collateral asset
     #[account(
-        constraint = ousd_mint.key().eq(&state.ousd_mint) @ CommonError::InvalidOusdMint,
+        constraint = ousd_mint.key().eq(&state.ousd_mint) @ OneRingFinanceError::InvalidOusdMint,
     )]
     pub ousd_mint: Box<Account<'info, Mint>>,
 
@@ -388,8 +388,8 @@ pub struct Claim<'info> {
     /// 1USD token
     #[account(
         mut,
-        constraint = initializer_ousd_token.owner.eq(initializer.key) @ CommonError::InvalidOusdAccountOwner,
-        constraint = initializer_ousd_token.mint.eq(&ousd_mint.key()) @ CommonError::InvalidOusdMint,
+        constraint = initializer_ousd_token.owner.eq(initializer.key) @ OneRingFinanceError::InvalidOusdAccountOwner,
+        constraint = initializer_ousd_token.mint.eq(&ousd_mint.key()) @ OneRingFinanceError::InvalidOusdMint,
     )]
     pub initializer_ousd_token: Box<Account<'info, TokenAccount>>,
 
@@ -402,14 +402,14 @@ pub struct Claim<'info> {
             state.key().as_ref(),
         ],
         bump = reserve.nonce,
-        constraint = !reserve.freeze_flag @ CommonError::ReserveFrozen,
+        constraint = !reserve.freeze_flag @ OneRingFinanceError::ReserveFrozen,
     )]
     pub reserve: Box<Account<'info, Reserve>>,
 
     /// main state
     #[account(
         mut,
-        constraint = !state.emergency_flag @ CommonError::ServiceDisabled,
+        constraint = !state.emergency_flag @ OneRingFinanceError::ServiceDisabled,
     )]
     pub state: Box<Account<'info, State>>,
 
@@ -447,7 +447,7 @@ impl<'info> Claim<'info> {
 
         // check if claim amount less than reward amount
         if self.reserve.reward_amount < args.amount {
-            return Err(CommonError::ClaimAmountTooMuch.into());
+            return Err(OneRingFinanceError::ClaimAmountTooMuch.into());
         }
 
         // reduct reward amount
@@ -478,14 +478,14 @@ pub struct ClaimAndDeposit<'info> {
             state.key().as_ref(),
         ],
         bump = reserve.nonce,
-        constraint = !reserve.freeze_flag @ CommonError::ReserveFrozen,
+        constraint = !reserve.freeze_flag @ OneRingFinanceError::ReserveFrozen,
     )]
     pub reserve: Box<Account<'info, Reserve>>,
 
     /// main state
     #[account(
         mut,
-        constraint = !state.emergency_flag @ CommonError::ServiceDisabled,
+        constraint = !state.emergency_flag @ OneRingFinanceError::ServiceDisabled,
     )]
     pub state: Box<Account<'info, State>>,
 
@@ -503,7 +503,7 @@ impl<'info> ClaimAndDeposit<'info> {
 
         // check if claim amount less than reward amount
         if self.reserve.reward_amount < args.amount {
-            return Err(CommonError::ClaimAmountTooMuch.into());
+            return Err(OneRingFinanceError::ClaimAmountTooMuch.into());
         }
 
         // reduct reward amount

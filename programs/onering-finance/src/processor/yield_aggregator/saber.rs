@@ -36,8 +36,8 @@ pub struct SaberDeposit<'info> {
 
     /// main state
     #[account(
-        has_one = admin @ CommonError::AccessDenied,
-        constraint = !state.emergency_flag @ CommonError::ServiceDisabled,
+        has_one = admin @ OneRingFinanceError::AccessDenied,
+        constraint = !state.emergency_flag @ OneRingFinanceError::ServiceDisabled,
     )]
     pub state: Box<Account<'info, State>>,
 
@@ -124,8 +124,8 @@ pub struct SaberWithdraw<'info> {
 
     /// main state
     #[account(
-        has_one = admin @ CommonError::AccessDenied,
-        constraint = !state.emergency_flag @ CommonError::ServiceDisabled,
+        has_one = admin @ OneRingFinanceError::AccessDenied,
+        constraint = !state.emergency_flag @ OneRingFinanceError::ServiceDisabled,
     )]
     pub state: Box<Account<'info, State>>,
 
@@ -226,8 +226,8 @@ pub struct SaberWithdrawOne<'info> {
 
     /// main state
     #[account(
-        has_one = admin @ CommonError::AccessDenied,
-        constraint = !state.emergency_flag @ CommonError::ServiceDisabled,
+        has_one = admin @ OneRingFinanceError::AccessDenied,
+        constraint = !state.emergency_flag @ OneRingFinanceError::ServiceDisabled,
     )]
     pub state: Box<Account<'info, State>>,
 

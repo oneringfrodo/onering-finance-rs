@@ -47,7 +47,7 @@ pub struct CreateMarket<'info> {
 
     /// main state
     #[account(
-        has_one = admin @ CommonError::AccessDenied,
+        has_one = admin @ OneRingFinanceError::AccessDenied,
     )]
     pub state: Box<Account<'info, State>>,
 
